@@ -1,5 +1,7 @@
 using CorepetitorApi.Data;
+using CorepetitorApi.Repositories;
 using Microsoft.EntityFrameworkCore;
+using CorepetitorApi.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,10 @@ string connectionString = "Server=localhost;Database=corepetitor;User=root;Passw
 
 builder.Services.AddDbContext<CorepetitorDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 25)))); // Adjust the version to your MySQL version
+
+builder.Services.AddScoped<ITutorRepository, TutorRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 
 var app = builder.Build();
 
@@ -28,5 +34,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapTutorEndpoints();
 
 app.Run();
