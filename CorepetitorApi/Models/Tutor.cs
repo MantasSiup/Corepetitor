@@ -16,8 +16,8 @@
 
         public string City { get; set; }
 
-        public ICollection<Student> Students { get; set; }
-        public ICollection<Module> Modules { get; set; }
+        public List<Student> Students { get; set; }
+        public List<Module> Modules { get; set; }
 
     }
 }
