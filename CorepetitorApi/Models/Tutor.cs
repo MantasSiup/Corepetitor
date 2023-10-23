@@ -16,8 +16,8 @@
 
         public string City { get; set; }
 
-        public List<Student> Students { get; set; }
-        public List<Module> Modules { get; set; }
+        //public List<Student>? Students { get; set; }
+        public List<Module>? Modules { get; set; }
 
     }
 }

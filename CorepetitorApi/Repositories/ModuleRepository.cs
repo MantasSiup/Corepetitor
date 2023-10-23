@@ -12,20 +12,44 @@ namespace CorepetitorApi.Repositories
             _context = context;
         }
 
-        public IEnumerable<Module> GetAllModules() => _context.Modules.ToList();
+        public IEnumerable<Module> GetAllModules(int tutorId) => _context.Modules.Where(m=>m.TutorId==tutorId).ToList();
 
-        public Module GetModuleById(int id) => _context.Modules.Find(id);
-
-        public void AddModule(Module module)
+        public Module GetModuleById(int tutorId, int id)
         {
-            _context.Modules.Add(module);
-            _context.SaveChanges();
+            return _context.Modules.Where(m => m.TutorId == tutorId).FirstOrDefault();
         }
 
-        public void UpdateModule(Module module)
+        public void AddModule(int TutorId, Module module)
         {
-            _context.Modules.Update(module);
+            module.TutorId = TutorId;
+            _context.Modules.Add(module);
             _context.SaveChanges();
+
+            var tutor = _context.Tutors.Find(TutorId);
+            tutor.Modules.Add(module);
+            _context.SaveChanges();
+
+        }
+
+        public Module? UpdateModule(int tutorId, Module module)
+        {
+            module.TutorId = tutorId;
+            if (!ModuleExists(module.Id, tutorId))
+            {
+                return null;
+            }
+            var existingModule = _context.Modules.Find(module.Id);
+            try
+            {
+                _context.Modules.Update(module);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return null;
+            }
+
+            return module;
         }
 
         public void DeleteModule(int id)
@@ -36,6 +60,12 @@ namespace CorepetitorApi.Repositories
                 _context.Modules.Remove(module);
                 _context.SaveChanges();
             }
+        }
+
+
+        public bool ModuleExists(int id, int tutorId)
+        {
+            return (_context.Modules?.Any(e => e.Id == id && e.TutorId == tutorId)).GetValueOrDefault();
         }
     }
 }

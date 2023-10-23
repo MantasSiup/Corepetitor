@@ -42,8 +42,7 @@ namespace CorepetitorApi.Repositories
         }
     }
 
-
-public static class TutorEndpoints
+/*public static class TutorEndpoints
 {
 	public static void MapTutorEndpoints (this IEndpointRouteBuilder routes)
     {
@@ -104,4 +103,5 @@ public static class TutorEndpoints
         .WithName("DeleteTutor")
         .WithOpenApi();
     }
-}}
+}*/
+}

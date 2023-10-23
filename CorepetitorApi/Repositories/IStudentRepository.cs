@@ -5,10 +5,10 @@ namespace CorepetitorApi.Repositories
 {
     public interface IStudentRepository
     {
-        IEnumerable<Student> GetAllStudents();
-        Student GetStudentById(int id);
-        void AddStudent(Student student);
-        void UpdateStudent(Student student);
-        void DeleteStudent(int id);
+        List<Student> GetAllStudents(int TutorId, int ModuleId);
+        Student GetStudentById(int TutorId, int ModuleId, int id);
+        void AddStudent(int TutorId, int ModuleId,Student student);
+        void UpdateStudent(int TutorId, int ModuleId, Student student);
+        void DeleteStudent(int TutorId, int ModuleId, int id);
     }
 }
