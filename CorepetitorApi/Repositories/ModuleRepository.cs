@@ -16,7 +16,7 @@ namespace CorepetitorApi.Repositories
 
         public Module GetModuleById(int tutorId, int id)
         {
-            return _context.Modules.Where(m => m.TutorId == tutorId).FirstOrDefault();
+            return _context.Modules.Where(m => m.TutorId == tutorId && m.Id==id).FirstOrDefault();
         }
 
         public void AddModule(int TutorId, Module module)

@@ -1,17 +1,23 @@
 import React, { Component } from 'react';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 
-export class Home extends Component {
-    static displayName = Home.name;
+export class Students extends Component {
+    static displayName = Students.name;
 
     constructor(props) {
         super(props);
         this.state = {
             tutors: [],
             tutor: {},
+            modules: [],
+            module: {},
+            students: [],
+            student: {},
             tutorId: 0,
+            moduleId: 0,
+            studentId: 0,
             newTutorData: {
-                id:'',
+                id: '',
                 name: '',
                 email: '',
                 password: '',
@@ -22,56 +28,82 @@ export class Home extends Component {
         };
     }
 
-    fetchAllTutors = async () => {
+    fetchAllStudents = async () => {
         try {
+            const { tutorId, moduleId } = this.state;
+            if (tutorId < 0) {
+                alert('Tutor ID cannot be negative.');
+                return;
+            }
+            if (moduleId < 0) {
+                alert('Module ID cannot be negative.');
+                return;
+            }
             const token = localStorage.getItem('token');
-            const response = await fetch('https://localhost:7014/api/Tutors', {
+            const response = await fetch(`https://localhost:7014/api/Tutors/${tutorId}/Modules/${moduleId}/Students`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
 
             if (response.ok) {
-                const tutors = await response.json();
-                this.setState({ tutors });
+                const students = await response.json();
+                this.setState({ students });
             } else {
-                alert('Failed to fetch tutors: ' + response.status);
+                alert('Failed to fetch students: ' + response.status);
             }
         } catch (error) {
-            alert('Error fetching tutors: ' + error);
+            alert('Error fetching students: ' + error);
         }
     };
 
-    fetchTutorById = async () => {
+    fetchStudentById = async () => {
         try {
-            const { tutorId } = this.state;
+            const { tutorId, moduleId, studentId } = this.state;
 
             if (tutorId < 0) {
                 alert('Tutor ID cannot be negative.');
                 return;
             }
+            if (moduleId < 0) {
+                alert('Tutor ID cannot be negative.');
+                return;
+            }
+            if (studentId < 0) {
+                alert('Tutor ID cannot be negative.');
+                return;
+            }
 
             const token = localStorage.getItem('token');
-            const response = await fetch(`https://localhost:7014/api/Tutors/${tutorId}`, {
+            const response = await fetch(`https://localhost:7014/api/Tutors/${tutorId}/Modules/${moduleId}/Students/${studentId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+            console.log(response.url);
 
             if (response.ok) {
-                const tutor = await response.json();
-                this.setState({ tutor });
+                const student = await response.json();
+                this.setState({ student });
             } else {
-                alert(`Failed to fetch tutor with ID ${tutorId}: ` + response.status);
+                alert(`Failed to fetch student with ID ${moduleId}: ` + response.status);
             }
         } catch (error) {
-            alert(`Error fetching tutor by ID`, error);
+            alert(`Error fetching student by ID`, error);
         }
     };
 
     handleTutorIdChange = (event) => {
         const tutorId = parseInt(event.target.value, 10);
         this.setState({ tutorId });
+    };
+    handleModuleIdChange = (event) => {
+        const moduleId = parseInt(event.target.value, 10);
+        this.setState({ moduleId });
+    };
+    handleStudentIdChange = (event) => {
+        const studentId = parseInt(event.target.value, 10);
+        this.setState({ studentId });
     };
 
     handleInputChange = (field, value) => {
@@ -98,7 +130,7 @@ export class Home extends Component {
                 this.fetchAllTutors();
                 console.log('Tutor added successfully');
             } else {
-                throw new Error(response.status);
+                throw new Error(`Failed to add tutor: ${response.statusText}`);
             }
         } catch (error) {
             console.error('Error adding tutor:', error);
@@ -121,7 +153,7 @@ export class Home extends Component {
                 this.fetchAllTutors();
                 console.log(`Tutor with ID ${id} updated successfully`);
             } else {
-                throw new Error(response.status);
+                throw new Error(`Failed to update tutor: ${response.statusText}`);
             }
         } catch (error) {
             console.error('Error updating tutor:', error);
@@ -129,91 +161,87 @@ export class Home extends Component {
         }
     };
 
-    deleteTutor = async (id) => {
-        try {
-            const response = await fetch(`https://localhost:7014/api/Tutors/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-
-            if (response.ok) {
-                this.fetchAllTutors();
-                console.log(`Tutor with ID ${id} deleted successfully`);
-            } else {
-                throw new Error(response.status);
-            }
-        } catch (error) {
-            console.error('Error deleting tutor:', error);
-            alert(`Failed to delete tutor: ${error.message}`);
-        }
-    };
-
     render() {
-        const { tutors, tutor, tutorId } = this.state;
+        const { tutors, tutor, tutorId, moduleId, module, modules, students, student, studentId } = this.state;
 
         return (
             <div>
-                <h1>Hello, world!</h1>
-
+                <h1>Students!</h1>
+                <Form inline>
+                    <FormGroup className="mr-2">
+                <Label>TutorId</Label>
+                <Input
+                    type="number"
+                    id="tutorIdInput"
+                    value={tutorId}
+                    onChange={this.handleTutorIdChange}
+                    style={{ width: '80px' }}
+                />
+                        <Label for="moduleIdInput" className="mr-2">
+                            Module ID:
+                        </Label>
+                        <Input
+                            type="number"
+                            id="moduleIdInput"
+                            value={moduleId}
+                            onChange={this.handleModuleIdChange}
+                            style={{ width: '80px' }}
+                        />
+                    </FormGroup>
                 <div className="mb-4">
                     <h2>Choose Action</h2>
-                    <Button color="primary" className="mr-2" onClick={this.fetchAllTutors}>
-                        Fetch All Tutors
+                    <Button color="primary" className="mr-2" onClick={this.fetchAllStudents}>
+                        Fetch All Students
                     </Button>
                 </div>
 
                 <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-                    <h2>All Tutors</h2>
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone Number</th>
-                                    <th>Address</th>
-                                    <th>City</th>
-                                    {/* Add other properties as needed */}
+                    <h2>All Modules</h2>
+                    <table className="table table-bordered">
+                        <thead>
+                           <tr>
+                               <th>ID</th>
+                               <th>Name</th>
+                               <th>Email</th>
+                               <th>Phone Number</th>
+                               <th>Address</th>
+                               <th>City</th>
+                               <th>Tutor id</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                            {students.map((student) => (
+                                <tr key={student.id}>
+                                    <td>{student.id}</td>
+                                    <td>{student.name}</td>
+                                    <td>{student.email}</td>
+                                    <td>{student.phoneNumber}</td>
+                                    <td>{student.address}</td>
+                                    <td>{student.city}</td>
+                                    <td>{student.tutorId}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {tutors.map((tutor) => (
-                                    <tr key={tutor.id}>
-                                        <td>{tutor.id}</td>
-                                        <td>{tutor.name}</td>
-                                        <td>{tutor.email}</td>
-                                        <td>{tutor.phoneNumber}</td>
-                                        <td>{tutor.address}</td>
-                                        <td>{tutor.city}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
+                            ))}
+                        </tbody>
                         </table>
-                </div>
-
-                <Form inline>
-                    <FormGroup className="mr-2">
-                        <Label for="tutorIdInput" className="mr-2">
-                            Tutor ID:
+                        <Label for="studentIdInput" className="mr-2">
+                            Student ID:
                         </Label>
                         <Input
                             type="number"
-                            id="tutorIdInput"
-                            value={tutorId}
-                            onChange={this.handleTutorIdChange}
+                            id="studentIdInput"
+                            value={studentId}
+                            onChange={this.handleStudentIdChange}
                             style={{ width: '80px' }}
                         />
-                    </FormGroup>
-                    <Button color="primary" onClick={this.fetchTutorById}>
-                        Fetch Tutor by ID
+                </div>
+                    <Button color="primary" onClick={this.fetchStudentById}>
+                        Fetch Student by ID
                     </Button>
                 </Form>
 
                 <div>
-                    <h2>Specific Tutor</h2>
-                    {Object.keys(tutor).length !== 0 ? (
+                    <h2>Specific Student</h2>
+                    {Object.keys(student).length !== 0 ? (
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
@@ -223,22 +251,23 @@ export class Home extends Component {
                                     <th>Phone Number</th>
                                     <th>Address</th>
                                     <th>City</th>
-                                    {/* Add other properties as needed */}
+                                    <th>Tutor id</th>
                                 </tr>
                             </thead>
-                            <tbody>  
-                                    <tr key={tutor.id}>
-                                        <td>{tutor.id}</td>
-                                        <td>{tutor.name}</td>
-                                        <td>{tutor.email}</td>
-                                        <td>{tutor.phoneNumber}</td>
-                                        <td>{tutor.address}</td>
-                                        <td>{tutor.city}</td>
-                                    </tr>
+                            <tbody>
+                                <tr key={student.id}>
+                                    <td>{student.id}</td>
+                                    <td>{student.name}</td>
+                                    <td>{student.email}</td>
+                                    <td>{student.phoneNumber}</td>
+                                    <td>{student.address}</td>
+                                    <td>{student.city}</td>
+                                    <td>{student.tutorId}</td>
+                                </tr>
                             </tbody>
                         </table>
                     ) : (
-                        <p>No specific tutor found.</p>
+                        <p>No specific student found.</p>
                     )}
                 </div>
 
@@ -348,27 +377,6 @@ export class Home extends Component {
                         </Button>
                     </form>
                 </div>
-                <div>
-                    <h2>Delete Tutor</h2>
-                    <Form inline>
-                        <FormGroup className="mr-2">
-                            <Label for="deleteTutorIdInput" className="mr-2">
-                                Tutor ID:
-                            </Label>
-                            <Input
-                                type="number"
-                                id="deleteTutorIdInput"
-                                value={tutorId}
-                                onChange={this.handleTutorIdChange}
-                                style={{ width: '80px' }}
-                            />
-                        </FormGroup>
-                        <Button color="danger" onClick={() => this.deleteTutor(tutorId)}>
-                            Delete Tutor
-                        </Button>
-                    </Form>
-                </div>
-
             </div>
         );
     }
