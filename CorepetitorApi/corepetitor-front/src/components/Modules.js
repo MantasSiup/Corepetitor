@@ -147,6 +147,27 @@ export class Modules extends Component {
         }
     };
 
+    deleteModule = async (id, moduleId) => {
+        try {
+            const response = await fetch(`https://localhost:7014/api/Tutors/${id}/Modules/${moduleId}/`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.ok) {
+                this.fetchAllModules();
+                console.log(`Module with ID ${id} deleted successfully`);
+            } else {
+                throw new Error(response.status);
+            }
+        } catch (error) {
+            console.error('Error deleting module:', error);
+            alert(`Failed to delete module: ${error.message}`);
+        }
+    };
+
 
     render() {
         const { tutors, tutor, tutorId, moduleId, module, modules } = this.state;
@@ -198,7 +219,7 @@ export class Modules extends Component {
                             </tbody>
                         </table>
                 </div>
-
+                <div>
                 <Form inline>
                     <FormGroup className="mr-2">
                         <Label for="moduleIdInput" className="mr-2">
@@ -215,7 +236,8 @@ export class Modules extends Component {
                     <Button color="primary" onClick={this.fetchModuleById}>
                         Fetch Module by ID
                     </Button>
-                </Form>
+                    </Form>
+                </div>
 
                 <div>
                     <h2>Specific Module</h2>
@@ -351,6 +373,37 @@ export class Modules extends Component {
                             Update Module
                         </Button>
                     </form>
+                </div>
+
+                <div>
+                    <h2>Delete Module</h2>
+                    <Form inline>
+                        <FormGroup className="mr-2">
+                            <Label for="deleteTutorIdInput" className="mr-2">
+                                Tutor ID:
+                            </Label>
+                            <Input
+                                type="number"
+                                id="deleteTutorIdInput"
+                                value={tutorId}
+                                onChange={this.handleTutorIdChange}
+                                style={{ width: '80px' }}
+                            />
+                            <Label for="deleteModuleIdInput" className="mr-2">
+                                Module ID:
+                            </Label>
+                            <Input
+                                type="number"
+                                id="deleteModuleIdInput"
+                                value={moduleId}
+                                onChange={this.handleModuleIdChange}
+                                style={{ width: '80px' }}
+                            />
+                        </FormGroup>
+                        <Button color="danger" onClick={() => this.deleteModule(tutorId, moduleId)}>
+                            Delete Module
+                        </Button>
+                    </Form>
                 </div>
                
             </div>

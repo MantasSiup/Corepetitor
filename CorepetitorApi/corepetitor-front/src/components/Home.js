@@ -11,7 +11,6 @@ export class Home extends Component {
             tutor: {},
             tutorId: 0,
             newTutorData: {
-                id:'',
                 name: '',
                 email: '',
                 password: '',
@@ -155,8 +154,6 @@ export class Home extends Component {
 
         return (
             <div>
-                <h1>Hello, world!</h1>
-
                 <div className="mb-4">
                     <h2>Choose Action</h2>
                     <Button color="primary" className="mr-2" onClick={this.fetchAllTutors}>
@@ -291,7 +288,6 @@ export class Home extends Component {
                     </form>
                 </div>
 
-                {/* Update Tutor Form */}
                 <div>
                     <h2>Update Tutor</h2>
                     <form>

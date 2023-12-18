@@ -161,6 +161,27 @@ export class Students extends Component {
         }
     };
 
+    deleteStudent = async (id, moduleId, studentId) => {
+        try {
+            const response = await fetch(`https://localhost:7014/api/Tutors/${id}/Modules/${moduleId}/Students/${studentId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.ok) {
+                this.fetchAllStudents();
+                console.log(`Student with ID ${id} deleted successfully`);
+            } else {
+                throw new Error(response.status);
+            }
+        } catch (error) {
+            console.error('Error deleting student:', error);
+            alert(`Failed to delete student: ${error.message}`);
+        }
+    };
+
     render() {
         const { tutors, tutor, tutorId, moduleId, module, modules, students, student, studentId } = this.state;
 
@@ -196,7 +217,7 @@ export class Students extends Component {
                 </div>
 
                 <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-                    <h2>All Modules</h2>
+                    <h2>All Students</h2>
                     <table className="table table-bordered">
                         <thead>
                            <tr>
@@ -223,6 +244,7 @@ export class Students extends Component {
                             ))}
                         </tbody>
                         </table>
+                        <div>
                         <Label for="studentIdInput" className="mr-2">
                             Student ID:
                         </Label>
@@ -233,6 +255,7 @@ export class Students extends Component {
                             onChange={this.handleStudentIdChange}
                             style={{ width: '80px' }}
                         />
+                        </div>
                 </div>
                     <Button color="primary" onClick={this.fetchStudentById}>
                         Fetch Student by ID
@@ -272,7 +295,7 @@ export class Students extends Component {
                 </div>
 
                 <div>
-                    <h2>Add Tutor</h2>
+                    <h2>Add Student</h2>
                     <form>
                         {/* Input fields for adding a new tutor */}
                         <div>
@@ -315,14 +338,14 @@ export class Students extends Component {
                         </div>
                         {/* Add other input fields for properties like email, password, etc. */}
                         <Button color="primary" type="button" onClick={this.addTutor}>
-                            Add Tutor
+                            Add Student
                         </Button>
                     </form>
                 </div>
 
                 {/* Update Tutor Form */}
                 <div>
-                    <h2>Update Tutor</h2>
+                    <h2>Update Student</h2>
                     <form>
                         {/* Input fields for updating an existing tutor */}
                         <div>
@@ -373,10 +396,52 @@ export class Students extends Component {
                         </div>
                         {/* Add other input fields for properties like email, password, etc. */}
                         <Button color="primary" type="button" onClick={() => this.updateTutor(this.state.newTutorData.id)}>
-                            Update Tutor
+                            Update Student
                         </Button>
                     </form>
                 </div>
+
+                <div>
+                    <h2>Delete Student</h2>
+                    <Form inline>
+                        <FormGroup className="mr-2">
+                            <Label for="deleteTutorIdInput" className="mr-2">
+                                Tutor ID:
+                            </Label>
+                            <Input
+                                type="number"
+                                id="deleteTutorIdInput"
+                                value={tutorId}
+                                onChange={this.handleTutorIdChange}
+                                style={{ width: '80px' }}
+                            />
+                            <Label for="deleteModuleIdInput" className="mr-2">
+                                Module ID:
+                            </Label>
+                            <Input
+                                type="number"
+                                id="deleteModuleIdInput"
+                                value={moduleId}
+                                onChange={this.handleModuleIdChange}
+                                style={{ width: '80px' }}
+                            />
+                            <Label for="deleteModuleIdInput" className="mr-2">
+                                Student ID:
+                            </Label>
+                            <Input
+                                type="number"
+                                id="deleteStudentIdInput"
+                                value={studentId}
+                                onChange={this.handleStudentIdChange}
+                                style={{ width: '80px' }}
+                            />
+                        </FormGroup>
+                        <Button color="danger" onClick={() => this.deleteStudent(tutorId, moduleId, studentId)}>
+                            Delete Student
+                        </Button>
+                    </Form>
+                </div>
+
             </div>
         );
     }
