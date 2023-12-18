@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CorepetitorApi.Repositories;
 using CorepetitorApi.Models;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 [Route("api/tutors/{tutorId}/modules/{moduleId}/[controller]")]
 [ApiController]
@@ -16,6 +16,8 @@ public class StudentsController : ControllerBase
 
     // GET: api/tutors/{tutorId}/modules/{moduleId}/Students
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<IEnumerable<Student>> GetAll(int tutorId, int moduleId)
     {
         var students = _repository.GetAllStudents(tutorId, moduleId);
@@ -28,6 +30,8 @@ public class StudentsController : ControllerBase
 
     // GET: api/tutors/{tutorId}/modules/{moduleId}/Students/{id}
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<Student> Get(int tutorId, int moduleId, int id)
     {
         var student = _repository.GetStudentById(tutorId, moduleId, id);
@@ -40,6 +44,9 @@ public class StudentsController : ControllerBase
 
     // POST: api/tutors/{tutorId}/modules/{moduleId}/Students
     [HttpPost]
+    [Authorize (Roles = "admin, tutor")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<Student> Add(int tutorId, int moduleId, Student student)
     {
         _repository.AddStudent(tutorId, moduleId, student);
@@ -48,6 +55,9 @@ public class StudentsController : ControllerBase
 
     // PUT: api/tutors/{tutorId}/modules/{moduleId}/Students/{id}
     [HttpPut("{id}")]
+    [Authorize(Roles = "admin, tutor")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult Update(int tutorId, int moduleId, int id, Student student)
     {
         if (id != student.Id) return BadRequest("Student ID mismatch.");
@@ -55,9 +65,12 @@ public class StudentsController : ControllerBase
         _repository.UpdateStudent(tutorId, moduleId, student);
         return NoContent();
     }
-
+    
     // DELETE: api/tutors/{tutorId}/modules/{moduleId}/Students/{id}
     [HttpDelete("{id}")]
+    [Authorize(Roles = "admin, tutor")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<Student> Delete(int tutorId, int moduleId, int id)
     {
         _repository.DeleteStudent(tutorId, moduleId, id);

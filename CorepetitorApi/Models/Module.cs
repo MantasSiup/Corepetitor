@@ -8,8 +8,8 @@
         public decimal? PricePerHour { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int TutorId { get; set; }
-        public Tutor Tutor { get; set; }
-        public List<StudentModule> StudentModules { get; set; }
+        public int? TutorId { get; set; }
+        public Tutor? Tutor { get; set; }
+        public List<StudentModule>? StudentModules { get; set; }
     }
 }

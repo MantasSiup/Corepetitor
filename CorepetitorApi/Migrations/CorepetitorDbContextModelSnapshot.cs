@@ -146,6 +146,25 @@ namespace CorepetitorApi.Migrations
                     b.ToTable("Tutors");
                 });
 
+            modelBuilder.Entity("CorepetitorApi.Models.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserRoles");
+                });
+
             modelBuilder.Entity("CorepetitorApi.Models.Module", b =>
                 {
                     b.HasOne("CorepetitorApi.Models.Tutor", "Tutor")

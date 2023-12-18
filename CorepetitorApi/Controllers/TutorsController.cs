@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using CorepetitorApi.Repositories;
 using CorepetitorApi.Models;
 using System.Collections.Generic;
 
+[Authorize (Roles = "admin")]
 [Route("api/[controller]")]
 [ApiController]
 public class TutorsController : ControllerBase
@@ -16,6 +18,10 @@ public class TutorsController : ControllerBase
 
     // GET: api/Tutors
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult<IEnumerable<Tutor>> GetAll()
     {
         var tutors = _repository.GetAllTutors();
@@ -28,6 +34,10 @@ public class TutorsController : ControllerBase
 
     // GET: api/Tutors/{id}
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult<Tutor> Get(int id)
     {
         var tutor = _repository.GetTutorById(id);
@@ -40,6 +50,10 @@ public class TutorsController : ControllerBase
 
     // POST: api/Tutors
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult<Tutor> Add(Tutor tutor)
     {
         // You might want to check if the tutor already exists to prevent duplicates.
@@ -49,6 +63,10 @@ public class TutorsController : ControllerBase
 
     // PUT: api/Tutors/{id}
     [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult Update(int id, Tutor tutor)
     {
         if (id != tutor.Id)
@@ -61,6 +79,10 @@ public class TutorsController : ControllerBase
 
     // DELETE: api/Tutors/{id}
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult<Tutor> Delete(int id)
     {
         // Before deleting, it might be wise to check if the tutor exists.

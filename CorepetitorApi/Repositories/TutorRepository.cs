@@ -1,5 +1,6 @@
 ﻿using CorepetitorApi.Models;
 using CorepetitorApi.Data;
+using CorepetitorApi.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -15,9 +16,34 @@ namespace CorepetitorApi.Repositories
             _context = context;
         }
 
-        public IEnumerable<Tutor> GetAllTutors() => _context.Tutors.ToList();
+        public IEnumerable<TutorDto> GetAllTutors() 
+        {
+            return _context.Tutors.Select(t => new TutorDto
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Email = t.Email,
+                Password = t.Password,
+                PhoneNumber = t.PhoneNumber,
+                Address = t.Address,
+                City = t.City
+            }).ToList();
+        }
 
-        public Tutor GetTutorById(int id) => _context.Tutors.Find(id);
+        public TutorDto GetTutorById(int id)
+        {
+            return _context.Tutors.Where(t => t.Id == id)
+                .Select(t => new TutorDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Email = t.Email,
+                    Password = t.Password,
+                    PhoneNumber = t.PhoneNumber,
+                    Address = t.Address,
+                    City = t.City
+                }).FirstOrDefault();
+        }
 
         public void AddTutor(Tutor tutor)
         {

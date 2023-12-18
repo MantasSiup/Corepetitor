@@ -95,7 +95,11 @@ namespace CorepetitorApi.Repositories
 
             _context.StudentModules.Remove(studentModule);
 
-            _context.Students.Remove(student);
+            var anyStudentLeft = _context.StudentModules.FirstOrDefault(sm => sm.StudentId == id && sm.ModuleId == ModuleId);
+            if (studentModule == null)
+            {
+                _context.Students.Remove(student);
+            }
 
             _context.SaveChanges();
         }
