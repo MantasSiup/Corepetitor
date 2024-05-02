@@ -8,10 +8,10 @@ namespace CorepetitorApi.Controllers
     {
         private readonly OpenAIAPI _openAiClient;
 
-        public ChatGptService(string apiKey = "sk-proj-waho4CjlQtz3DHenLGy7T3BlbkFJ4tDAeu6W3gNtJl7bjC4X")
+        public ChatGptService(IConfiguration config)
         {
-            _openAiClient = new OpenAIAPI(apiKey); 
-
+            string apiKey = config["AppSettings:OpenAiApiKey"];
+            _openAiClient = new OpenAIAPI(apiKey);
         }
 
         public async Task<string> SendMessage(string userInput)
