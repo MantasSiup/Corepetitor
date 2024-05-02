@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Button, Form, FormGroup, Input, Label, Modal } from 'reactstrap';
+import ModuleModal from './ModuleModal';
+import { Students } from './Students';
 
 export class Modules extends Component {
     static displayName = Modules.name;
@@ -23,12 +25,18 @@ export class Modules extends Component {
                 endDate: null,
                 tutorId: 0,
             },
+            show: false,
+            suggestion: '',
+            students: [],
+            showModal: false,
+            selectedModule: {},
         };
     }
 
     fetchAllModules = async () => {
         try {
-            const { tutorId } = this.state;
+            const { tutor } = this.state;
+            const tutorId = tutor.id;
             if (tutorId < 0) {
                 alert('Tutor ID cannot be negative.');
                 return;
@@ -48,6 +56,25 @@ export class Modules extends Component {
             }
         } catch (error) {
             alert('Error fetching modules: ' + error);
+        }
+    };
+
+    getTutorIdByEmail = async () => {
+        try {
+            const email = localStorage.getItem('userEmail');
+            if (email == '')
+                return;
+            const response = await fetch(`https://localhost:7014/api/Tutors/get-by-email?email=${email}`, {
+            });
+            if (response.ok) {
+                const tutor = await response.json();
+                this.setState({ tutor });
+                console.log(tutor);
+            } else {
+                alert(`Failed to fetch tutor by email ${email}: ` + response.status);
+            }
+        } catch (error) {
+            alert(`Error fetching tutor by email`, error);
         }
     };
 
@@ -168,21 +195,50 @@ export class Modules extends Component {
         }
     };
 
+    handleShowModal = (module) => {
+        this.fetchAllStudents(module);
+    }
+
+    handleCloseModal = () => {
+        this.setState({ showModal: false });
+    }
+
+    fetchAllStudents = async (module) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`https://localhost:7014/api/Tutors/${module.tutorId}/Modules/${module.id}/Students`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                const students = await response.json();
+                this.setState({ students, showModal: true, selectedModule: module });
+            } else {
+                alert('Failed to fetch students: ' + response.status);
+            }
+        } catch (error) {
+            alert('Error fetching students: ' + error);
+        }
+    };
+
+
+
+    componentDidMount() {
+        setTimeout(500);
+        this.getTutorIdByEmail();
+    }
+
+
 
     render() {
-        const { tutors, tutor, tutorId, moduleId, module, modules } = this.state;
-
+    const { tutors, tutor, tutorId, moduleId, module, modules, students, selectedModule, showModal} = this.state;
         return (
             <div>
                 <h1>Modules!</h1>
-                <Label>TutorId</Label>
-                <Input
-                    type="number"
-                    id="tutorIdInput"
-                    value={tutorId}
-                    onChange={this.handleTutorIdChange}
-                    style={{ width: '80px' }}
-                />
+                <div>
+                </div>
                 <div className="mb-4">
                     <h2>Choose Action</h2>
                     <Button color="primary" className="mr-2" onClick={this.fetchAllModules}>
@@ -199,9 +255,6 @@ export class Modules extends Component {
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>PricePerHour</th>
-                                <th>Start date</th>
-                                <th>End date</th>
-                                <th>Tutor id</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -211,9 +264,9 @@ export class Modules extends Component {
                                         <td>{module.name}</td>
                                         <td>{module.description}</td>
                                         <td>{module.pricePerHour}</td>
-                                        <td>{module.startDate}</td>
-                                        <td>{module.endDate}</td>
-                                        <td>{module.tutorId}</td>
+                                        <td>
+                                            <Button variant="primary" onClick={() => this.handleShowModal(module)}>Select</Button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -405,8 +458,9 @@ export class Modules extends Component {
                         </Button>
                     </Form>
                 </div>
-               
+                <ModuleModal module={selectedModule} students={ students } show={showModal} handleClose={this.handleCloseModal} />
             </div>
         );
     }
 }
+export default Modules;

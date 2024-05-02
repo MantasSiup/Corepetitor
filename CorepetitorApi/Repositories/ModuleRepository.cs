@@ -14,9 +14,26 @@ namespace CorepetitorApi.Repositories
 
         public IEnumerable<Module> GetAllModules(int tutorId) => _context.Modules.Where(m=>m.TutorId==tutorId).ToList();
 
+        public IEnumerable<Module> GetAllModules() => _context.Modules.ToList().DistinctBy(x => x.Name);
+
         public Module GetModuleById(int tutorId, int id)
         {
-            return _context.Modules.Where(m => m.TutorId == tutorId && m.Id==id).FirstOrDefault();
+            return _context.Modules.Where(m => m.TutorId == tutorId && m.Id == id).FirstOrDefault();
+        }
+
+        public IEnumerable<Module> GetModulesByStudentId(int id)
+        {
+            var studentModules = _context.StudentModules
+         .Where(st => st.StudentId == id)
+         .Select(st => st.ModuleId) // Select only ModuleId
+         .ToList(); // Materialize the query here to avoid issues
+
+            // Retrieve Modules where ModuleId matches the studentModules
+            var result = _context.Modules
+                .Where(module => studentModules.Contains(module.Id))
+                .ToList(); // Materialize the query here
+
+            return result;
         }
 
         public void AddModule(int TutorId, Module module)

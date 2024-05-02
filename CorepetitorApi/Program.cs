@@ -80,6 +80,7 @@ builder.Services.AddScoped<ITutorRepository, TutorRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddTransient<AuthRepository>();
+builder.Services.AddScoped<ChatGptService>();
 
 var app = builder.Build();
 

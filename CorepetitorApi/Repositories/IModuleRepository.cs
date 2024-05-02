@@ -6,6 +6,8 @@ namespace CorepetitorApi.Repositories
     public interface IModuleRepository
     {
         IEnumerable<Module> GetAllModules(int tutorId);
+        IEnumerable<Module> GetAllModules();
+        IEnumerable<Module> GetModulesByStudentId(int id);
         Module GetModuleById(int tutorId, int id);
         void AddModule(int tutorId, Module module);
         Module UpdateModule(int tutorId,Module module);

@@ -258,3 +258,4 @@ C:\Users\Drift\Documents\GitHub\Corepetitor\CorepetitorApi\bin\Debug\net7.0\Micr
 C:\Users\Drift\Documents\GitHub\Corepetitor\CorepetitorApi\bin\Debug\net7.0\corepetitor-front\package-lock.json
 C:\Users\Drift\Documents\GitHub\Corepetitor\CorepetitorApi\bin\Debug\net7.0\corepetitor-front\package.json
 C:\Users\Drift\Documents\GitHub\Corepetitor\CorepetitorApi\bin\Debug\net7.0\corepetitor-front\public\manifest.json
+C:\Users\Drift\Documents\GitHub\Corepetitor\CorepetitorApi\bin\Debug\net7.0\OpenAI_API.dll

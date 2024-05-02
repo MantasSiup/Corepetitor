@@ -44,7 +44,7 @@ public class StudentsController : ControllerBase
 
     // POST: api/tutors/{tutorId}/modules/{moduleId}/Students
     [HttpPost]
-    [Authorize (Roles = "admin, tutor")]
+    //[Authorize (Roles = "admin, tutor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<Student> Add(int tutorId, int moduleId, Student student)
@@ -74,6 +74,17 @@ public class StudentsController : ControllerBase
     public ActionResult<Student> Delete(int tutorId, int moduleId, int id)
     {
         _repository.DeleteStudent(tutorId, moduleId, id);
+        return NoContent();
+    }
+
+    // DELETE: api/tutors/{tutorId}/modules/{moduleId}/Students/remove/{id}
+    [HttpDelete("remove/{id}")]
+    //[Authorize(Roles = "admin, tutor")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public ActionResult<Student> Remove(int tutorId, int moduleId, int id)
+    {
+        _repository.RemoveStudentFromModule(tutorId, moduleId, id);
         return NoContent();
     }
 }

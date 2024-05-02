@@ -39,6 +39,7 @@ export class Login extends Component {
 
                 // Save the token to local storage
                 localStorage.setItem('token', responseData.token);
+                localStorage.setItem('userEmail', this.state.email);
 
                 console.log('Login successful');
                 // Optionally, provide feedback to the user
@@ -46,6 +47,7 @@ export class Login extends Component {
 
                 // Close the modal
                 this.handleHideLoginModal();
+                window.location.reload();
             } else {
                 // Handle login failure
                 console.error('Login failed', response.statusText);

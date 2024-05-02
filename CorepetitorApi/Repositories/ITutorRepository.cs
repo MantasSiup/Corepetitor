@@ -8,6 +8,7 @@ namespace CorepetitorApi.Repositories
     {
         IEnumerable<TutorDto> GetAllTutors();
         TutorDto GetTutorById(int id);
+        TutorDto GetTutorByEmail(string email);
         void AddTutor(Tutor tutor);
         void UpdateTutor(Tutor tutor);
         void DeleteTutor(int id);

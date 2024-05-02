@@ -45,6 +45,21 @@ namespace CorepetitorApi.Repositories
                 }).FirstOrDefault();
         }
 
+        public TutorDto GetTutorByEmail(string email)
+        {
+            return _context.Tutors.Where(t => t.Email == email)
+                .Select(t => new TutorDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Email = t.Email,
+                    Password = t.Password,
+                    PhoneNumber = t.PhoneNumber,
+                    Address = t.Address,
+                    City = t.City
+                }).FirstOrDefault();
+        }
+
         public void AddTutor(Tutor tutor)
         {
             _context.Tutors.Add(tutor);

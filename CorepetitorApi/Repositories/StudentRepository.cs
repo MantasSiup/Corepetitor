@@ -29,8 +29,12 @@ namespace CorepetitorApi.Repositories
 
         public void AddStudent(int TutorId, int ModuleId, Student student)
         {
-            _context.Students.Add(student);
-            _context.SaveChanges();
+            var isExisting = _context.Students.Any(sm => sm.Id == student.Id);
+            if (!isExisting)
+            {
+                _context.Students.Add(student);
+                _context.SaveChanges();
+            }
 
             var module = _context.Modules.FirstOrDefault(m => m.Id == ModuleId && m.TutorId == TutorId);
             if (module == null)
@@ -104,6 +108,33 @@ namespace CorepetitorApi.Repositories
             _context.SaveChanges();
         }
 
+
+        public void RemoveStudentFromModule(int TutorId, int ModuleId, int id)
+        {
+            var student = _context.Students.Find(id);
+
+            if (student == null)
+            {
+                throw new Exception("Student not found.");
+            }
+
+            var module = _context.Modules.FirstOrDefault(m => m.Id == ModuleId && m.TutorId == TutorId);
+            if (module == null)
+            {
+                throw new Exception("Module not found or doesn't belong to the specified tutor.");
+            }
+
+            var studentModule = _context.StudentModules.FirstOrDefault(sm => sm.StudentId == id && sm.ModuleId == ModuleId);
+            if (studentModule == null)
+            {
+                throw new Exception("Student is not associated with the specified module.");
+            }
+
+            _context.StudentModules.Remove(studentModule);
+
+            _context.SaveChanges();
+        }
+
         Student IStudentRepository.GetStudentById(int TutorId, int ModuleId, int id)
         {
             var module = _context.Modules.FirstOrDefault(m => m.TutorId == TutorId && m.Id == ModuleId);
@@ -113,6 +144,12 @@ namespace CorepetitorApi.Repositories
                 return null;
             }
             return _context.Students.Where(st => st.StudentModules.Any(sm => sm.ModuleId == module.Id && sm.StudentId == id)).FirstOrDefault();
+        }
+
+        Student IStudentRepository.GetStudentByEmail(string Email)
+        {
+            return _context.Students.Where(st => st.Email == Email)
+                .FirstOrDefault();
         }
     }
 }

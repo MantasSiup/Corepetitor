@@ -4,7 +4,7 @@ using CorepetitorApi.Repositories;
 using CorepetitorApi.Models;
 using System.Collections.Generic;
 
-[Authorize (Roles = "admin")]
+//[Authorize (Roles = "admin")]
 [Route("api/[controller]")]
 [ApiController]
 public class TutorsController : ControllerBase
@@ -44,6 +44,21 @@ public class TutorsController : ControllerBase
 
         if (tutor == null)
             return NotFound($"Tutor with id {id} not found.");
+
+        return Ok(tutor);
+    }
+
+    [HttpGet("get-by-email")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public ActionResult<Tutor> GetTutorByEmail([FromQuery] string email)
+    {
+        var tutor = _repository.GetTutorByEmail(email);
+
+        if (tutor == null)
+            return NotFound($"Tutor with email: {email} not found.");
 
         return Ok(tutor);
     }

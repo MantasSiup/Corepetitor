@@ -2,6 +2,8 @@
 using CorepetitorApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using CorepetitorApi.Dtos;
+using CorepetitorApi.Models;
+using NuGet.Protocol.Core.Types;
 
 namespace CorepetitorApi.Controllers
 {
@@ -11,12 +13,14 @@ namespace CorepetitorApi.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly AuthRepository _authRepository;
+        private readonly IStudentRepository _studentRepository;
         private readonly AuthHelper authHelper;
 
-        public AuthController(ILogger<AuthController> logger, AuthRepository authRepository, IConfiguration config)
+        public AuthController(ILogger<AuthController> logger, AuthRepository authRepository, IStudentRepository studentRepository, IConfiguration config)
         {
             _logger = logger;
             _authRepository = authRepository;
+            _studentRepository = studentRepository;
             authHelper = new AuthHelper(config);
         }
 
@@ -63,6 +67,29 @@ namespace CorepetitorApi.Controllers
                 return Created(string.Empty, new { Token = token });
             }
             return BadRequest();
+        }
+
+
+        [HttpGet("role")]
+        public IActionResult GetUserRole([FromQuery] string userEmail)
+        {
+            var role = _authRepository.GetUserRole(userEmail);
+            return Ok(new { role });
+        }
+
+        [HttpGet("get-by-email")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public ActionResult<Tutor> GetStudentByEmail([FromQuery] string email)
+        {
+            var student = _studentRepository.GetStudentByEmail(email);
+
+            if (student == null)
+                return NotFound($"Student with email: {email} not found.");
+
+            return Ok(student);
         }
     }
 }
