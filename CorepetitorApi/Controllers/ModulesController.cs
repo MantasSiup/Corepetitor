@@ -3,6 +3,7 @@ using CorepetitorApi.Repositories;
 using CorepetitorApi.Models;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 [Route("api/tutors/{tutorId}/[controller]")]
 [ApiController]
@@ -45,18 +46,31 @@ public class ModulesController : ControllerBase
         return CreatedAtAction(nameof(Get), new { tutorId, id = module.Id }, module);
     }
 
+    // POST: api/tutors/{tutorId}/add-to-module
+    [HttpPost("add-to-module")]
+    [Authorize(Roles = "admin, tutor")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult AddTutorToModule(int tutorId, int moduleId)
+    {
+        var result = _repository.AddTutorToModule(tutorId, moduleId);
+        if (result)
+        {
+            return Ok();
+        }
+        return BadRequest();
+    }
+
     // PUT: api/tutors/{tutorId}/Modules/{id}
     [Authorize(Roles = "admin, tutor")]
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-
     public ActionResult Update(int tutorId, int id, Module module)
     {
-        if (id != module.Id) return BadRequest();
-
-        var updatedModule = _repository.UpdateModule(tutorId, module);
+        var updatedModule = _repository.UpdateModule(id, module);
         if (updatedModule == null) return NotFound();
 
         return NoContent();
@@ -74,6 +88,21 @@ public class ModulesController : ControllerBase
         if (!_repository.ModuleExists(id, tutorId)) return NotFound();
 
         _repository.DeleteModule(id);
+        return NoContent();
+    }
+
+    // DELETE: api/tutors/{tutorId}/Modules/{id}
+    [Authorize(Roles = "admin, tutor")]
+    [HttpDelete("remove-from-module")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+
+    public ActionResult<Module> RemoveFromModule(int tutorId, int moduleId)
+    {
+        if (!_repository.ModuleExists(moduleId, tutorId)) return NotFound();
+
+        _repository.RemoveFromModule(tutorId, moduleId);
         return NoContent();
     }
 }

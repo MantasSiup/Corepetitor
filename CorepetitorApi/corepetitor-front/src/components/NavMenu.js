@@ -81,15 +81,16 @@ export class NavMenu extends Component {
                                 </>
                             )}
                             {userRole === 'student' && (
-                                <NavItem>
-                                    <NavLink tag={Link} className="text-dark" to="/modules">Modules</NavLink>
-                                </NavItem>
+                                <>
+                                   
+                                    <NavItem>
+                                        <NavLink tag={Link} className="text-dark" to="/studentView">StudentView</NavLink>
+                                    </NavItem>
+                                </>
                             )}
                             {userRole === 'tutor' && (
                                 <>
-                                    <NavItem>
-                                        <NavLink tag={Link} className="text-dark" to="/students">Students</NavLink>
-                                    </NavItem>
+                                   
                                     <NavItem>
                                         <NavLink tag={Link} className="text-dark" to="/modules">Modules</NavLink>
                                     </NavItem>
@@ -98,9 +99,7 @@ export class NavMenu extends Component {
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/about">About</NavLink>
                             </NavItem>
-                            <NavItem>
-                                <NavLink tag={Link} className="text-dark" to="/studentView">StudentView</NavLink>
-                            </NavItem>
+                           
                             {!token && (
                                 <NavItem>
                                     <NavLink tag={Link} className="text-dark" to="/login">Login</NavLink>

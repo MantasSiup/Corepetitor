@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Form, FormGroup, Input, Label, Modal } from 'reactstrap';
+import AddModuleForm from './AddModuleForm';
 import ModuleModal from './ModuleModal';
 import { Students } from './Students';
 
@@ -30,8 +31,19 @@ export class Modules extends Component {
             students: [],
             showModal: false,
             selectedModule: {},
+            showForm: false,
+            uniqueModules: [],
         };
     }
+
+    handleOpenForm = () => {
+        this.setState({ showForm: true });
+    };
+
+    handleCloseForm = () => {
+        this.setState({ showForm: false });
+        this.fetchAllModules();
+    };
 
     fetchAllModules = async () => {
         try {
@@ -201,6 +213,7 @@ export class Modules extends Component {
 
     handleCloseModal = () => {
         this.setState({ showModal: false });
+        this.fetchAllModules();
     }
 
     fetchAllStudents = async (module) => {
@@ -216,7 +229,7 @@ export class Modules extends Component {
                 const students = await response.json();
                 this.setState({ students, showModal: true, selectedModule: module });
             } else {
-                alert('Failed to fetch students: ' + response.status);
+                this.setState({ students:[], showModal: true, selectedModule: module });
             }
         } catch (error) {
             alert('Error fetching students: ' + error);
@@ -224,16 +237,53 @@ export class Modules extends Component {
     };
 
 
+    fetchAllUniqueModules = async () => {
+        try {
+            const response = await fetch(`https://localhost:7014/api/UniqueModules`);
+
+            if (response.ok) {
+                const uniqueModules = await response.json();
+                this.setState({ uniqueModules });
+            } else {
+                alert('Failed to fetch modules: ' + response.status);
+            }
+        } catch (error) {
+            alert('Error fetching modules: ' + error);
+        }
+    };
+
 
     componentDidMount() {
         setTimeout(500);
         this.getTutorIdByEmail();
     }
 
+    handleSelectModule = async (tutorId, moduleId) => {
+        try {
+            const response = await fetch(`https://localhost:7014/api/tutors/${tutorId}/Modules/add-to-module?moduleId=${moduleId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`, 
+                },
+            });
+
+            if (response.ok) {
+                console.log('Module added to tutor successfully');
+                alert('Module added to tutor successfully');
+                this.fetchAllModules();
+            } else {
+                alert(`Failed to add module becaues you already have it`);
+            }
+        } catch (error) {
+            console.error('Error adding module to tutor:', error);
+        }
+    };
+
 
 
     render() {
-    const { tutors, tutor, tutorId, moduleId, module, modules, students, selectedModule, showModal} = this.state;
+    const { tutors, tutor, tutorId, moduleId, module, modules, students, selectedModule, showModal, showForm, uniqueModules} = this.state;
         return (
             <div>
                 <h1>Modules!</h1>
@@ -242,16 +292,15 @@ export class Modules extends Component {
                 <div className="mb-4">
                     <h2>Choose Action</h2>
                     <Button color="primary" className="mr-2" onClick={this.fetchAllModules}>
-                        Fetch All Modules
+                        Fetch my modules
                     </Button>
                 </div>
 
                 <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-                    <h2>All Modules</h2>
+                    <h2>My modules</h2>
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
-                                <th>ID</th>
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>PricePerHour</th>
@@ -260,7 +309,6 @@ export class Modules extends Component {
                             <tbody>
                                 {modules.map((module) => (
                                     <tr key={module.id}>
-                                        <td>{module.id}</td>
                                         <td>{module.name}</td>
                                         <td>{module.description}</td>
                                         <td>{module.pricePerHour}</td>
@@ -271,194 +319,41 @@ export class Modules extends Component {
                                 ))}
                             </tbody>
                         </table>
-                </div>
-                <div>
-                <Form inline>
-                    <FormGroup className="mr-2">
-                        <Label for="moduleIdInput" className="mr-2">
-                            Module ID:
-                        </Label>
-                        <Input
-                            type="number"
-                            id="moduleIdInput"
-                            value={moduleId}
-                            onChange={this.handleModuleIdChange}
-                            style={{ width: '80px' }}
-                        />
-                    </FormGroup>
-                    <Button color="primary" onClick={this.fetchModuleById}>
-                        Fetch Module by ID
-                    </Button>
-                    </Form>
-                </div>
+                </div>  
 
                 <div>
-                    <h2>Specific Module</h2>
-                    {Object.keys(module).length !== 0 ? (
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>PricePerHour</th>
-                                    <th>Start date</th>
-                                    <th>End date</th>
-                                    <th>Tutor id</th>
-                                </tr>
-                            </thead>
-                            <tbody>  
+                    <button type="button" className="btn btn-primary" onClick={() => this.fetchAllUniqueModules()}>Find existing modules</button>
+                </div>
+
+                <div style={{ maxHeight: '300px', overflow: 'auto' }}>
+                    <table className="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>PricePerHour</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {uniqueModules.map((module) => (
                                 <tr key={module.id}>
-                                    <td>{module.id}</td>
                                     <td>{module.name}</td>
                                     <td>{module.description}</td>
                                     <td>{module.pricePerHour}</td>
-                                    <td>{module.startDate}</td>
-                                    <td>{module.endDate}</td>
-                                    <td>{module.tutorId}</td>
+                                    <td><Button variant="primary" onClick={() => this.handleSelectModule(tutor.id, module.id)}>Select</Button></td>
                                 </tr>
-                            </tbody>
-                        </table>
-                    ) : (
-                        <p>No specific module found.</p>
-                    )}
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
 
                 <div>
-                    <h2>Add Module</h2>
-                    <form>
-                        <div>
-                            <label>Name:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newModuleData.name}
-                                onChange={(e) => this.handleInputChange('name', e.target.value)}
-                            />
-                            <label>Description:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newModuleData.description}
-                                onChange={(e) => this.handleInputChange('description', e.target.value)}
-                            />
-                            <label>Price per hour:</label>
-                            <Input
-                                type="number"
-                                value={this.state.newModuleData.pricePerHour}
-                                onChange={(e) => this.handleInputChange('pricePerHour', e.target.value)}
-                            />
-                            <label>Start date</label>
-                            <Input
-                                type="date"
-                                value={this.state.newModuleData.startDate}
-                                onChange={(e) => this.handleInputChange('startDate', e.target.value)}
-                            />
-                            <label>End date:</label>
-                            <Input
-                                type="date"
-                                value={this.state.newModuleData.endDate}
-                                onChange={(e) => this.handleInputChange('endDate', e.target.value)}
-                            />
-                            <label>Tutor ID:</label>
-                            <Input
-                                type="number"
-                                value={this.state.newModuleData.tutorId}
-                                onChange={(e) => this.handleInputChange('tutorId', e.target.value)}
-                            />
-                        </div>
-                        {/* Add other input fields for properties like email, password, etc. */}
-                        <Button color="primary" type="button" onClick={this.addModule}>
-                            Add Tutor
-                        </Button>
-                    </form>
+                    <button type="button" className="btn btn-primary" onClick={this.handleOpenForm}>Add Module</button>
+                    <AddModuleForm show={showForm} handleClose={this.handleCloseForm} moduleTutorId={ tutor.id } />
                 </div>
 
-                <div>
-                    <h2>Update Module</h2>
-                    <form>
-                        <div>
-                            <label>Tutor ID:</label>
-                            <Input
-                                type="number"
-                                value={this.state.newModuleData.tutorId}
-                                onChange={(e) => this.handleInputChange('tutorId', e.target.value)}
-                            />
-                            <Label for="moduleIdInput" className="mr-2">
-                                Module ID:
-                            </Label>
-                            <Input
-                                type="number"
-                                value={this.state.newModuleData.id}
-                                onChange={(e) => this.handleInputChange('id', e.target.value)}
-                            />
-                            <label>Name:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newModuleData.name}
-                                onChange={(e) => this.handleInputChange('name', e.target.value)}
-                            />
-                            <label>Description:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newModuleData.description}
-                                onChange={(e) => this.handleInputChange('description', e.target.value)}
-                            />
-                            <label>Price per hour:</label>
-                            <Input
-                                type="number"
-                                value={this.state.newModuleData.pricePerHour}
-                                onChange={(e) => this.handleInputChange('pricePerHour', e.target.value)}
-                            />
-                            <label>Start date</label>
-                            <Input
-                                type="date"
-                                value={this.state.newModuleData.startDate}
-                                onChange={(e) => this.handleInputChange('startDate', e.target.value)}
-                            />
-                            <label>End date:</label>
-                            <Input
-                                type="date"
-                                value={this.state.newModuleData.endDate}
-                                onChange={(e) => this.handleInputChange('endDate', e.target.value)}
-                            />
-                            
-                        </div>
-                        <Button color="primary" type="button" onClick={() => this.updateModule(this.state.newModuleData.tutorId, this.state.newModuleData.id)}>
-                            Update Module
-                        </Button>
-                    </form>
-                </div>
-
-                <div>
-                    <h2>Delete Module</h2>
-                    <Form inline>
-                        <FormGroup className="mr-2">
-                            <Label for="deleteTutorIdInput" className="mr-2">
-                                Tutor ID:
-                            </Label>
-                            <Input
-                                type="number"
-                                id="deleteTutorIdInput"
-                                value={tutorId}
-                                onChange={this.handleTutorIdChange}
-                                style={{ width: '80px' }}
-                            />
-                            <Label for="deleteModuleIdInput" className="mr-2">
-                                Module ID:
-                            </Label>
-                            <Input
-                                type="number"
-                                id="deleteModuleIdInput"
-                                value={moduleId}
-                                onChange={this.handleModuleIdChange}
-                                style={{ width: '80px' }}
-                            />
-                        </FormGroup>
-                        <Button color="danger" onClick={() => this.deleteModule(tutorId, moduleId)}>
-                            Delete Module
-                        </Button>
-                    </Form>
-                </div>
-                <ModuleModal module={selectedModule} students={ students } show={showModal} handleClose={this.handleCloseModal} />
+               
+                <ModuleModal tutorId={ tutor.id } module={selectedModule} students={ students } show={showModal} handleClose={this.handleCloseModal} />
             </div>
         );
     }

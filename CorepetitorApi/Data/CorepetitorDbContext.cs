@@ -14,6 +14,7 @@ namespace CorepetitorApi.Data
         public DbSet<Module> Modules { get; set; }
         public DbSet<StudentModule> StudentModules { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<TutorModule> TutorModules { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,9 @@ namespace CorepetitorApi.Data
                 .HasMany(m => m.StudentModules)
                 .WithOne(sm => sm.Module)
                 .HasForeignKey(sm => sm.ModuleId);
+
+            modelBuilder.Entity<TutorModule>()
+                .HasKey(tm => new { tm.TutorId, tm.ModuleId });
         }
 
     }

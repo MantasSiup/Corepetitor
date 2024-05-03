@@ -10,8 +10,10 @@ namespace CorepetitorApi.Repositories
         IEnumerable<Module> GetModulesByStudentId(int id);
         Module GetModuleById(int tutorId, int id);
         void AddModule(int tutorId, Module module);
-        Module UpdateModule(int tutorId,Module module);
+        bool AddTutorToModule(int tutorId, int moduleId);
+        Module UpdateModule(int id, Module module);
         void DeleteModule(int id);
+        void RemoveFromModule(int tutorId, int moduleId);
         bool ModuleExists(int id, int tutorId);
     }
 }
