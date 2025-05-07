@@ -5,9 +5,11 @@ export class TutorSearch extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            allModules: [],
             modules: [],
             showModal: false,
             userInput: '',
+            inputError: ''
         };
     }
 
@@ -43,7 +45,7 @@ export class TutorSearch extends Component {
 
             if (response.ok) {
                 const modules = await response.json();
-                this.setState({ modules });
+                this.setState({ modules, allModules: modules });
             } else {
                 alert('Failed to fetch modules: ' + response.status);
             }
@@ -52,34 +54,45 @@ export class TutorSearch extends Component {
         }
     };
 
+    handleInputChange = (e) => {
+        this.setState({
+            userInput: e.target.value,
+            inputError: '' // clear on edit
+        });
+    };
+    
+
     handleShowModal = () => {
         this.setState({ showModal: true });
     };
 
     handleHideModal = () => {
-        this.setState({ showModal: false });
+        this.setState({ showModal: false, userInput: '' });
     };
 
-    handleInputChange = (e) => {
-        this.setState({ userInput: e.target.value });
-    }
-
-    handleModulesFiltering = (responseText: string) => {
-        const currentModules = this.state.modules;
-        const modulesFromResponse = responseText.split(',').map(module => module.trim());
-
-        const filteredModules = currentModules.filter(module => {
-            // Check if the module description exists in the response
-            return modulesFromResponse.includes(module.description);
-        });
-
-        // Update state to store only the filtered modules
+    handleModulesFiltering = (responseText) => {
+        const { allModules } = this.state;
+      
+        const modulesFromResponse = responseText
+          .split(';')
+          .map(module => module.trim());
+      
+        const filteredModules = allModules.filter(module =>
+          modulesFromResponse.includes(module.description)
+        );
+      
         this.setState({ modules: filteredModules });
-        console.log(this.state.modules);
-    }
+      };
+      
 
     handleShowSuggestions = () => {
-        const UserInput = this.state.userInput; // Assuming you're storing user input in the state variable
+        const UserInput = this.state.userInput; 
+        if (!UserInput.trim()) {
+            this.setState({ inputError: 'Please enter a description before submitting.' });
+            return;
+        }
+
+        this.setState({ inputError: '' });
         fetch('https://localhost:7014/api/chat', {
             method: 'POST',
             headers: {
@@ -120,6 +133,9 @@ export class TutorSearch extends Component {
             if (response.ok) {
                 // Student added successfully, update UI as needed
                 console.log('Student added to module:', module.id);
+                setTimeout(() => {
+                    window.location.href = '/studentview';
+                }, 500); 
             } else {
                 alert('Failed to add student to module: ' + response.status);
             }
@@ -131,67 +147,87 @@ export class TutorSearch extends Component {
 
 
     render() {
-        const { modules } = this.state;
-        return (
-            <div>
-                <h1>Tutor search page</h1>
+    const { modules, showModal, userInput, inputError } = this.state;
+
+    return (
+        <div className="container py-5">
+            <h2 className="text-center mb-4">Find a Tutor</h2>
+
+            <div className="d-flex justify-content-center mb-4">
                 <Button variant="primary" onClick={this.handleShowModal}>
-                    Suggest a tutor
+                    Suggest a Tutor with AI
                 </Button>
-
-                <Modal show={this.state.showModal} onHide={this.handleHideModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>AI tutor suggestion</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group>
-                                <Form.Label>Let us help suggest you a tutor</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter information about a module you need to learn"
-                                    value={this.state.userInput}
-                                    onChange={this.handleInputChange}
-                                    as="textarea" rows={5}
-                                />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="primary" onClick={this.handleShowSuggestions}>
-                            Show suggestions
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-
-                <h2>All Modules</h2>
-
-                <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-                    <table className="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>PricePerHour</th>
-                                <th>Tutor id</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {modules.map((module) => (
-                                <tr key={module.id}>
-                                    <td>{module.name}</td>
-                                    <td>{module.description}</td>
-                                    <td>{module.pricePerHour}</td>
-                                    <td>{module.tutorId}</td>
-                                    <td><Button variant="primary" onClick={() => this.handleSelectModule(module)}>Select</Button></td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
             </div>
-        );
-    }
+
+            {/* Modal for AI tutor suggestion */}
+            <Modal show={showModal} onHide={this.handleHideModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>AI Tutor Suggestion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>What would you like help with?</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={4}
+                                name="userInput"
+                                placeholder="E.g. 'I want help with calculus basics'"
+                                value={userInput}
+                                onChange={this.handleInputChange}
+                                isInvalid={!!inputError}
+                            />
+                            {inputError && (
+                                <Form.Text className="text-danger fade-in">
+                                    {inputError}
+                                </Form.Text>
+                            )}
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={this.handleShowSuggestions}>
+                        Show Suggestions
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+                <h4>Suggested Modules</h4>
+                <Button
+                    variant="outline-secondary"
+                    onClick={() => this.setState({ modules: this.state.allModules })}
+                >
+                    Reset Filter
+                </Button>
+            </div>
+
+            {modules.length === 0 ? (
+                <p className="text-center text-muted">No modules available. Try searching with AI!</p>
+            ) : (
+                <div className="row">
+                    {modules.map((module) => (
+                        <div className="col-md-6 col-lg-4 mb-4" key={module.id}>
+                            <div className="card h-100 shadow-sm">
+                                <div className="card-body d-flex flex-column">
+                                    <h5 className="card-title">{module.name}</h5>
+                                    <p className="card-text text-muted">{module.description}</p>
+                                    <p className="mb-1"><strong>Price/hour:</strong> €{module.pricePerHour}</p>
+                                    <p className="mb-3"><strong>Tutor ID:</strong> {module.tutorId}</p>
+                                    <div className="mt-auto">
+                                        <Button variant="success" onClick={() => this.handleSelectModule(module)}>
+                                            Select Module
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 }
 
 export default TutorSearch;

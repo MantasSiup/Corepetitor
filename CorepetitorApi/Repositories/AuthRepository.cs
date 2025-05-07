@@ -43,5 +43,12 @@ namespace CorepetitorApi.Repositories
         {
             return _context.UserRoles.Where(o => o.Email == email).Select(o => o.Role).FirstOrDefault();
         }
+
+        public void AddUserRole(UserRole userRole)
+        {
+            _context.UserRoles.Add(userRole);
+            _context.SaveChanges();
+        }
+
     }
 }

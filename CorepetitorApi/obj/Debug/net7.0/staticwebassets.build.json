@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "60ERZ6FnsquEmTFGnAdBWaRr7hywFAN/lSS1rLIZQh0=",
+  "Hash": "bfk4gMOIsc8hjv5PXvTALbm8CECVH5tXLn2ub6DgwEs=",
   "Source": "CorepetitorApi",
   "BasePath": "_content/CorepetitorApi",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

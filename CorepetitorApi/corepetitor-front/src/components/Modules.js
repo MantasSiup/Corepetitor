@@ -33,6 +33,9 @@ export class Modules extends Component {
             selectedModule: {},
             showForm: false,
             uniqueModules: [],
+            toast: { show: false, message: '', variant: 'success' },
+            searchQuery: '',
+            editingModule: null,
         };
     }
 
@@ -74,13 +77,15 @@ export class Modules extends Component {
     getTutorIdByEmail = async () => {
         try {
             const email = localStorage.getItem('userEmail');
-            if (email == '')
+            if (email === '')
                 return;
             const response = await fetch(`https://localhost:7014/api/Tutors/get-by-email?email=${email}`, {
             });
             if (response.ok) {
                 const tutor = await response.json();
-                this.setState({ tutor });
+                this.setState({ tutor }, () => {
+                    this.fetchAllModules();
+                });
                 console.log(tutor);
             } else {
                 alert(`Failed to fetch tutor by email ${email}: ` + response.status);
@@ -89,6 +94,11 @@ export class Modules extends Component {
             alert(`Error fetching tutor by email`, error);
         }
     };
+
+    async componentDidMount() {
+        setTimeout(500);
+        await this.getTutorIdByEmail();
+    }    
 
     fetchModuleById = async () => {
         try {
@@ -123,6 +133,15 @@ export class Modules extends Component {
         }
     };
 
+    showToast = (message, variant = 'success') => {
+        this.setState({
+            toast: { show: true, message, variant }
+        });
+        setTimeout(() => {
+            this.setState({ toast: { ...this.state.toast, show: false } });
+        }, 3000);
+    };    
+
     handleTutorIdChange = (event) => {
         const tutorId = parseInt(event.target.value, 10);
         this.setState({ tutorId });
@@ -153,7 +172,7 @@ export class Modules extends Component {
 
             if (response.ok) {
                 this.fetchAllModules();
-                console.log('Module added successfully');
+                this.showToast('Module added successfully!', 'success');
             } else {
                 throw new Error(`Failed to add module: ${response.statusText}`);
             }
@@ -177,12 +196,13 @@ export class Modules extends Component {
             if (response.ok) {
                 this.fetchAllModules();
                 console.log(`Module with ID ${moduleId} updated successfully`);
+                this.showToast('Module was updated successfully!', 'success');
             } else {
                 throw new Error(`Failed to update module: ${response.statusText}`);
             }
         } catch (error) {
             console.error('Error updating module:', error);
-            alert(`Failed to update module: ${error.message}`);
+            this.showToast(`Failed to update module: ${error.message}`, 'danger');
         }
     };
 
@@ -198,12 +218,13 @@ export class Modules extends Component {
             if (response.ok) {
                 this.fetchAllModules();
                 console.log(`Module with ID ${id} deleted successfully`);
+                this.showToast('Module deleted successfully', 'success');
             } else {
                 throw new Error(response.status);
             }
         } catch (error) {
             console.error('Error deleting module:', error);
-            alert(`Failed to delete module: ${error.message}`);
+            this.showToast('Error deleting module', 'danger');;
         }
     };
 
@@ -253,11 +274,6 @@ export class Modules extends Component {
     };
 
 
-    componentDidMount() {
-        setTimeout(500);
-        this.getTutorIdByEmail();
-    }
-
     handleSelectModule = async (tutorId, moduleId) => {
         try {
             const response = await fetch(`https://localhost:7014/api/tutors/${tutorId}/Modules/add-to-module?moduleId=${moduleId}`, {
@@ -270,91 +286,134 @@ export class Modules extends Component {
 
             if (response.ok) {
                 console.log('Module added to tutor successfully');
-                alert('Module added to tutor successfully');
+                this.showToast('Module added to tutor!', 'success');
                 this.fetchAllModules();
             } else {
-                alert(`Failed to add module becaues you already have it`);
+                this.showToast('You already have this module.', 'danger');
             }
         } catch (error) {
             console.error('Error adding module to tutor:', error);
         }
     };
 
-
+    handleSearchChange = (e) => {
+        this.setState({ searchQuery: e.target.value });
+    };
 
     render() {
-    const { tutors, tutor, tutorId, moduleId, module, modules, students, selectedModule, showModal, showForm, uniqueModules} = this.state;
+        const {
+            tutor,
+            modules,
+            students,
+            selectedModule,
+            showModal,
+            showForm,
+            uniqueModules,
+        } = this.state;
+        const { show, message, variant } = this.state.toast;
+        
         return (
-            <div>
-                <h1>Modules!</h1>
-                <div>
+        <>
+            {show && (
+                <div className="toast-container position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
+                  <div className={`toast show text-white bg-${variant} border-0`}>
+                    <div className="d-flex">
+                      <div className="toast-body">{message}</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="mb-4">
-                    <h2>Choose Action</h2>
-                    <Button color="primary" className="mr-2" onClick={this.fetchAllModules}>
-                        Fetch my modules
+              )}
+              
+            <div className="container py-5">
+                <h2 className="text-center mb-4">Manage Your Modules</h2>
+    
+                <div className="d-flex justify-content-center mb-4 flex-wrap gap-2">
+                    <Button variant="secondary" onClick={this.fetchAllUniqueModules}>
+                        Find Existing Modules
+                    </Button>
+                    <Button variant="success" onClick={this.handleOpenForm}>
+                        Add New Module
                     </Button>
                 </div>
-
-                <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-                    <h2>My modules</h2>
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>PricePerHour</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {modules.map((module) => (
-                                    <tr key={module.id}>
-                                        <td>{module.name}</td>
-                                        <td>{module.description}</td>
-                                        <td>{module.pricePerHour}</td>
-                                        <td>
-                                            <Button variant="primary" onClick={() => this.handleShowModal(module)}>Select</Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                </div>  
-
-                <div>
-                    <button type="button" className="btn btn-primary" onClick={() => this.fetchAllUniqueModules()}>Find existing modules</button>
-                </div>
-
-                <div style={{ maxHeight: '300px', overflow: 'auto' }}>
-                    <table className="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>PricePerHour</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {uniqueModules.map((module) => (
-                                <tr key={module.id}>
-                                    <td>{module.name}</td>
-                                    <td>{module.description}</td>
-                                    <td>{module.pricePerHour}</td>
-                                    <td><Button variant="primary" onClick={() => this.handleSelectModule(tutor.id, module.id)}>Select</Button></td>
-                                </tr>
+    
+                {/* My Modules Section */}
+                <div className="mb-5">
+                    <h4 className="mb-3">My Modules</h4>
+                    {modules.length === 0 ? (
+                        <p className="text-muted">No modules found.</p>
+                    ) : (
+                        <div className="row">
+                            {modules.map((module) => (
+                                <div className="col-md-6 col-lg-4 mb-4" key={module.id}>
+                                    <div className="card h-100 shadow-sm">
+                                        <div className="card-body d-flex flex-column">
+                                            <h5 className="card-title">{module.name}</h5>
+                                            <p className="card-text text-muted">{module.description}</p>
+                                            <p><strong>€{module.pricePerHour}</strong> / hour</p>
+                                            <div className="mt-auto">
+                                                <Button
+                                                    variant="outline-primary"
+                                                    onClick={() => this.handleShowModal(module)}>
+                                                    View
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    )}
                 </div>
-
-                <div>
-                    <button type="button" className="btn btn-primary" onClick={this.handleOpenForm}>Add Module</button>
-                    <AddModuleForm show={showForm} handleClose={this.handleCloseForm} moduleTutorId={ tutor.id } />
+    
+                {/* Existing Modules Section */}
+                <div className="mb-5">
+                    <h4 className="mb-3">Available Modules</h4>
+                    {uniqueModules.length === 0 ? (
+                        <p className="text-muted">No modules to display. Click "Find Existing Modules" above.</p>
+                    ) : (
+                        <div className="row">
+                            {uniqueModules.map((module) => (
+                                <div className="col-md-6 col-lg-4 mb-4" key={module.id}>
+                                    <div className="card h-100 shadow-sm">
+                                        <div className="card-body d-flex flex-column">
+                                            <h5 className="card-title">{module.name}</h5>
+                                            <p className="card-text text-muted">{module.description}</p>
+                                            <p><strong>€{module.pricePerHour}</strong> / hour</p>
+                                            <div className="mt-auto">
+                                                <Button
+                                                    variant="outline-success"
+                                                    onClick={() => this.handleSelectModule(tutor.id, module.id)}
+                                                >
+                                                    Add to My Modules
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
-
-               
-                <ModuleModal tutorId={ tutor.id } module={selectedModule} students={ students } show={showModal} handleClose={this.handleCloseModal} />
+    
+                {/* Add Module Form */}
+                <AddModuleForm 
+                    show={showForm} 
+                    handleClose={this.handleCloseForm} 
+                    moduleTutorId={tutor.id} 
+                    showToast={this.showToast} 
+                />
+    
+                {/* Student Modal */}
+                <ModuleModal
+                    tutorId={tutor.id}
+                    module={selectedModule}
+                    students={students}
+                    show={showModal}
+                    handleClose={this.handleCloseModal}
+                    showToast={this.showToast}
+                />
             </div>
+            </>
         );
     }
 }

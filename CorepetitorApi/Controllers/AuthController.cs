@@ -24,6 +24,53 @@ namespace CorepetitorApi.Controllers
             authHelper = new AuthHelper(config);
         }
 
+
+
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterStudentDto registerDto)
+        {
+            // Check if email already exists
+            var existingStudent = _studentRepository.GetStudentByEmail(registerDto.Email);
+            if (existingStudent != null)
+            {
+                return Conflict("A student with this email already exists.");
+            }
+
+            // Hash the password
+            //var hashedPassword = authHelper.HashPassword(registerDto.Password);
+
+            // Create Student object
+            var newStudent = new Student
+            {
+                Name = registerDto.Name,
+                Email = registerDto.Email,
+                Password = registerDto.Password,
+                PhoneNumber = registerDto.PhoneNumber,
+                Address = registerDto.Address,
+                City = registerDto.City
+            };
+
+            // Save student
+            _studentRepository.AddStudent(newStudent);
+
+
+            var userRole = new UserRole
+            {
+                Email = registerDto.Email,
+                Role = "student"
+            };
+            _authRepository.AddUserRole(userRole);
+
+            var token = authHelper.GenerateJwtToken(newStudent.Id, userRole.Role.ToString());
+
+            return Created(string.Empty, new
+            {
+                Message = "Registration successful.",
+                Token = token
+            });
+        }
+
+
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto loginData)
         {

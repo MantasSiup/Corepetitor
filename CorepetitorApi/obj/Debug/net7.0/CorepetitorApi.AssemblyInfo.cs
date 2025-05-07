@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CorepetitorApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8b6bd5bd187a544517f3814c0281e12764c637c9")]
 [assembly: System.Reflection.AssemblyProductAttribute("CorepetitorApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CorepetitorApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

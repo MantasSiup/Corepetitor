@@ -3,10 +3,11 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
-const ModuleModal = ({ tutorId, module, students, show, handleClose }) => {
+const ModuleModal = ({ tutorId, module, students, show, handleClose, showToast }) => {
     const [showDetails, setShowDetails] = useState({});
     const [editable, setEditable] = useState(false); // State to track edit mode
     const [editedModule, setEditedModule] = useState({}); // State to track edited module data
+    
 
     // Function to handle editing of module fields
     const handleEdit = () => {
@@ -37,15 +38,15 @@ const ModuleModal = ({ tutorId, module, students, show, handleClose }) => {
 
             if (response.status === 204) {
                 handleClose();
-                alert('Module succesfully updated');
+                showToast('Module successfully updated', 'success');
                 console.log('Saving changes:', editedModule);
                 setEditable(false); // Disable edit mode after saving changes
             } else {
-                alert(`Failed to update module: ${response.statusText}`);
+                showToast(`Failed to update module: ${response.statusText}`, 'danger');
             }
         } catch (error) {
             console.error('Error updating module:', error);
-            alert(`Failed to update module: ${error.message}`);
+            showToast(`Failed to update module: ${error.message}`, 'danger');
         }
     };
 
@@ -75,19 +76,20 @@ const ModuleModal = ({ tutorId, module, students, show, handleClose }) => {
             });
 
             if (response.status === 204) {
-                alert('Module removed successfully');
+                showToast('Module removed successfully', 'success');
                 handleClose();
                 handleRemoveAllStudentsFromModule(module, students);
             } else {
-                alert(`Failed to remove module: ${response.statusText}`);
+                showToast(`Failed to remove module: ${response.statusText}`, 'danger');
             }
         } catch (error) {
-            console.error('Error removing module:', error);        }
+            console.error('Error removing module:', error);
+            showToast(`Error removing module: ${error.message}`, 'danger');
+        }
     };
 
     const handleRemoveStudentFromModule = async (module, studentId) => {
         try {
-            console.log('trying');
             const response = await fetch(`https://localhost:7014/api/tutors/${tutorId}/modules/${module.id}/Students/remove/${studentId}`, {
                 method: 'DELETE',
             });
@@ -95,24 +97,25 @@ const ModuleModal = ({ tutorId, module, students, show, handleClose }) => {
             if (response.status === 204) {
                 handleClose();
                 setEditable(false);
+                showToast('Student removed successfully', 'success');
             } else {
-                alert('Failed to remove student from module: ' + response.status);
+                showToast('Failed to remove student from module: ' + response.status, 'danger');
             }
         } catch (error) {
-            alert('Error removing student from module: ' + error);
+            showToast('Error removing student from module: ' + error, 'danger');
         }
     };
 
     const handleRemoveAllStudentsFromModule = async (module, students) => {
         try {
-            console.log(students);
             students.forEach(async (student) => {
                 await handleRemoveStudentFromModule(module, student.id);
             });
 
             console.log('All students removed from the module successfully');
+            showToast('All students removed successfully', 'success');
         } catch (error) {
-            alert('Error removing students from the module:', error);
+            showToast('Error removing students from the module:', 'danger');
         }
     };
 

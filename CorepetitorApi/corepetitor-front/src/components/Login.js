@@ -1,13 +1,21 @@
 import React, { Component } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { getUserRoleFromToken } from '../helpers/authHelper';
+import { withRouter } from '../withRouter'; 
 
-export class Login extends Component {
+class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
             showLoginModal: false,
             email: '',
             password: '',
+            errors: {},
+            toast: {
+                show: false,
+                message: '',
+                variant: '', // 'success' or 'danger'
+            }
         };
     }
 
@@ -19,13 +27,68 @@ export class Login extends Component {
         this.setState({ showLoginModal: false });
     };
 
+    validateForm = () => {
+        const { email, password } = this.state;
+        const errors = {};
+    
+        if (!email) {
+            errors.email = "Email is required.";
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errors.email = "Please enter a valid email address.";
+            }
+        }
+    
+        if (!password) {
+            errors.password = "Password is required.";
+        } else if (password.length < 6) {
+            errors.password = "Password must be at least 6 characters long.";
+        }
+    
+        this.setState({ errors });
+    
+        return Object.keys(errors).length === 0;
+    };
+
+    handleInputChange = (e) => {
+        const { name, value } = e.target;
+    
+        // Clear the error for the field being edited
+        this.setState((prevState) => ({
+            [name]: value,
+            errors: {
+                ...prevState.errors,
+                [name]: ''
+            }
+        }));
+    };
+    
+    showToast = (message, variant = 'success') => {
+        this.setState({
+            toast: {
+                show: true,
+                message,
+                variant
+            }
+        });
+    
+        setTimeout(() => {
+            this.setState({ toast: { ...this.state.toast, show: false } });
+        }, 3000); // toast disappears after 3 seconds
+    };
+    
+
     handleLogin = async () => {
-        // Implement your login logic here
+        if (!this.validateForm()) {
+            return; // Stop if validation fails
+        }
+
         try {
             const response = await fetch('https://localhost:7014/api/Auth/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // Specify the content type as JSON
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     email: this.state.email,
@@ -34,81 +97,113 @@ export class Login extends Component {
             });
 
             if (response.ok) {
-                // Handle successful login
                 const responseData = await response.json();
 
-                // Save the token to local storage
+                // Save token
                 localStorage.setItem('token', responseData.token);
                 localStorage.setItem('userEmail', this.state.email);
-
+               
                 console.log('Login successful');
-                // Optionally, provide feedback to the user
-                alert('Login successful!');
-
-                // Close the modal
+                this.showToast('Login successful!', 'success');
+                setTimeout(() => {
+                const role = getUserRoleFromToken();
+                if (role === 'student') {
+                    this.props.navigate('/studentView');
+                } else if (role === 'tutor') {
+                    this.props.navigate('/modules');
+                } else if (role === 'admin') {
+                    this.props.navigate('/');
+                } else {
+                    this.props.navigate('/');
+                }
+                console.log("Decoded role:", role);
                 this.handleHideLoginModal();
-                window.location.reload();
+                window.location.reload(); // Optional, only if needed
+                }, 1500);
+
             } else {
-                // Handle login failure
                 console.error('Login failed', response.statusText);
-                // Optionally, provide feedback to the user
-                alert('Login failed. Please check your credentials.');
+                this.showToast('Login failed. Please check your credentials.', 'danger');
             }
         } catch (error) {
-            // Handle network or other errors
             console.error('Login failed', error);
-            // Optionally, provide feedback to the user
-            alert('Login failed due to a network error. Please try again later.');
+            this.showToast('Network error. Please try again later.', 'danger');
         }
     };
 
     render() {
+    const { show, message, variant } = this.state.toast;
         return (
-            <div>
-                <h1>Login Page</h1>
-                <Button variant="primary" onClick={this.handleShowLoginModal}>
-                    Open Login Modal
-                </Button>
+            <>
+            {show && (
+                <div
+                    className={`toast-container position-fixed top-0 end-0 p-3`}
+                    style={{ zIndex: 9999 }}
+                >
+                    <div className={`toast show align-items-center text-white bg-${variant} border-0`} role="alert">
+                        <div className="d-flex">
+                            <div className="toast-body">
+                                {message}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}            
+            <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
+                <div className="p-4 border rounded shadow" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'white' }}>
+                    <h2 className="text-center mb-4">Welcome back</h2>
+                    <p className="text-center text-muted">Please sign in to continue</p>
+    
+                    <Form>
+                    <Form.Group controlId="formBasicEmail" className="mb-3">
+                        <Form.Label>Email address</Form.Label>
+                        <Form.Control
+                            type="email"
+                            name="email"
+                            placeholder="Enter email"
+                            value={this.state.email}
+                            onChange={this.handleInputChange}
+                            isInvalid={!!this.state.errors.email}
+                        />
+                        <Form.Control.Feedback type="invalid" className="fade-in">
+                            {this.state.errors.email}
+                        </Form.Control.Feedback>
+                    </Form.Group>
 
-                <Modal show={this.state.showLoginModal} onHide={this.handleHideLoginModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Login</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group controlId="formBasicEmail">
-                                <Form.Label>Email address</Form.Label>
-                                <Form.Control
-                                    type="email"
-                                    placeholder="Enter email"
-                                    value={this.state.email}
-                                    onChange={(e) => this.setState({ email: e.target.value })}
-                                />
-                            </Form.Group>
+                    <Form.Group controlId="formBasicPassword" className="mb-3">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={this.state.password}
+                            onChange={this.handleInputChange}
+                            isInvalid={!!this.state.errors.password}
+                        />
 
-                            <Form.Group controlId="formBasicPassword">
-                                <Form.Label>Password</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    placeholder="Password"
-                                    value={this.state.password}
-                                    onChange={(e) => this.setState({ password: e.target.value })}
-                                />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={this.handleHideLoginModal}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={this.handleLogin}>
-                            Login
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                        <Form.Control.Feedback type="invalid" className="fade-in">
+                            {this.state.errors.password}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+
+    
+                        <div className="d-grid mb-2">
+                            <Button variant="primary" onClick={this.handleLogin}>
+                                Log In
+                            </Button>
+                        </div>
+    
+                        <div className="text-center">
+                            <Form.Text className="text-muted">
+                                Don't have an account? <a href="/register">Register here</a>
+                            </Form.Text>
+                        </div>
+                    </Form>
+                </div>
             </div>
+            </>
         );
-    }
+    }    
 }
 
-export default Login;
+export default withRouter(Login);

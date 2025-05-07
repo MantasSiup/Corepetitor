@@ -1,12 +1,12 @@
-import { Home } from "./components/Home";
-import { Login } from "./components/Login";
+/*import { Home } from "./components/Home";
+import Login from "./components/Login";
+import Register from "./components/Register"; // <-- import Register component
 import { Modules } from "./components/Modules";
 import { Students } from "./components/Students"
 import { About } from "./components/About"
 import { Navigate } from "react-router-dom";
 import StudentView from "./components/StudentView";
 import TutorSearch from "./components/TutorSearch";
-
 
 const token = localStorage.getItem('token');
 
@@ -28,8 +28,12 @@ const AppRoutes = [
         element: token ? <Navigate to="/" replace /> : <Login />
     },
     {
+        path: '/register',  // <-- new route for registration
+        element: token ? <Navigate to="/" replace /> : <Register />
+    },
+    {
         path: '/about',
-        element: <About/>
+        element: <About />
     },
     {
         path: '/studentView',
@@ -41,4 +45,4 @@ const AppRoutes = [
     }
 ];
 
-export default AppRoutes;
+export default AppRoutes;*/

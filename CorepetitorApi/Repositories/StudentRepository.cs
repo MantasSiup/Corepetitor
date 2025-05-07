@@ -52,6 +52,20 @@ namespace CorepetitorApi.Repositories
             _context.SaveChanges();
         }
 
+        public void AddStudent(Student student)
+        {
+            var isExisting = _context.Students.Any(s => s.Email == student.Email);
+            if (!isExisting)
+            {
+                _context.Students.Add(student);
+                _context.SaveChanges();
+            }
+            else
+            {
+                throw new Exception("Student with this email already exists.");
+            }
+        }
+
         public void UpdateStudent(int TutorId, int ModuleId, Student student)
         {
             _context.Students.Update(student);

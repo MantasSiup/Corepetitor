@@ -45,9 +45,9 @@ export class NavMenu extends Component {
     }
 
     handleLogout = () => {
+        window.location.href = '/about';
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
-        window.location.href = '/login';
     }
 
     toggleNavbar() {
@@ -101,13 +101,18 @@ export class NavMenu extends Component {
                             </NavItem>
                            
                             {!token && (
+                                <>
                                 <NavItem>
                                     <NavLink tag={Link} className="text-dark" to="/login">Login</NavLink>
                                 </NavItem>
+                                <NavItem>
+                                    <NavLink tag={Link} className="text-dark" to="/register">Register</NavLink>
+                                </NavItem>
+                             </>
                             )}
                             {token && (
                                 <NavItem>
-                                    <NavLink tag={Link} className="text-dark" to="/" onClick={this.handleLogout}>Logout</NavLink>
+                                    <NavLink tag={Link} className="text-dark" to="/about" onClick={this.handleLogout}>Logout</NavLink>
                                 </NavItem>
                             )}
                             

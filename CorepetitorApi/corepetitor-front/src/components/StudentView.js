@@ -30,7 +30,7 @@ class StudentViewPage extends React.Component {
     getStudentByEmail = async () => {
         try {
             const email = localStorage.getItem('userEmail');
-            if (email == '')
+            if (email === '')
                 return;
             const response = await fetch(`https://localhost:7014/api/Auth/get-by-email?email=${email}`, {
             });
@@ -49,7 +49,9 @@ class StudentViewPage extends React.Component {
     };
 
     componentDidMount() {
+        setTimeout(() => {
         this.getStudentByEmail();
+        },200)
     }
 
     fetchAllModules = async () => {
@@ -90,52 +92,74 @@ class StudentViewPage extends React.Component {
 
 
     render() {
-        const { isLoading, modules, selectedModule, showModal} = this.state;
+        const { isLoading, modules, selectedModule, showModal } = this.state;
+    
         return (
-            <div>
-                <h1>Student view page</h1>
-                <Button variant="primary" onClick={this.handleRedirectToSearchPage} disabled={isLoading}>
-                    {isLoading ? (
-                        <span>
-                            <Spinner animation="border" size="sm" /> Redirecting...
-                        </span>
-                    ) : (
-                        'Find a new tutor'
-                    )}
-                </Button>
-                <h2>My Modules</h2>          
-                <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-                    <table className="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>PricePerHour</th>
-                                <th>Tutor id</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {modules.map((module) => (
-                                <tr key={module.id}>
-                                    <td>{module.name}</td>
-                                    <td>{module.description}</td>
-                                    <td>{module.pricePerHour}</td>
-                                    <td>{module.tutorId}</td>
-                                    <td>
-                                        <Button variant="primary" onClick={() => this.handleShowModal(module)}>Select</Button>
-                                    </td>
-                                    <td>
-                                        <Button variant="secondary" onClick={() => this.handleRemoveStudentFromModule(module)}>Delete</Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <div className="container py-5">
+                <h2 className="text-center mb-4">Welcome to Your Dashboard</h2>
+    
+                <div className="d-flex justify-content-center mb-4">
+                    <Button
+                        variant="primary"
+                        onClick={this.handleRedirectToSearchPage}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <>
+                                <Spinner animation="border" size="sm" className="me-2" />
+                                Redirecting...
+                            </>
+                        ) : (
+                            'Find a New Tutor'
+                        )}
+                    </Button>
                 </div>
-                <ModuleModalStudent module={selectedModule} show={showModal} handleClose={this.handleCloseModal} />
+    
+                <h4 className="mb-3">Your Enrolled Modules</h4>
+    
+                {modules.length === 0 ? (
+                    <p className="text-muted text-center">You are not enrolled in any modules yet.</p>
+                ) : (
+                    <div className="row">
+                        {modules.map((module) => (
+                            <div className="col-md-6 col-lg-4 mb-4" key={module.id}>
+                                <div className="card h-100 shadow-sm">
+                                    <div className="card-body d-flex flex-column">
+                                        <h5 className="card-title">{module.name}</h5>
+                                        <p className="card-text text-muted">
+                                            {module.description}
+                                        </p>
+                                        <p className="mb-1"><strong>Price/hour:</strong> €{module.pricePerHour}</p>
+                                        <p className="mb-3"><strong>Tutor ID:</strong> {module.tutorId}</p>
+                                        <div className="mt-auto d-flex justify-content-between">
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => this.handleShowModal(module)}
+                                            >
+                                                View
+                                            </Button>
+                                            <Button
+                                                variant="outline-danger"
+                                                onClick={() => this.handleRemoveStudentFromModule(module)}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+    
+                <ModuleModalStudent
+                    module={selectedModule}
+                    show={showModal}
+                    handleClose={this.handleCloseModal}
+                />
             </div>
         );
-    }
+    }    
 }
 
 export default StudentViewPage;

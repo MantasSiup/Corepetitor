@@ -1,12 +1,7 @@
-﻿import React from 'react';
-import { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Button, Form, FormGroup, Input, Label, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
-
-
-
-
-const AddModuleForm = ({ show, handleClose, moduleTutorId }) => {
+const AddModuleForm = ({ show, handleClose, moduleTutorId, showToast }) => {
 
     const [moduleName, setModuleName] = useState('');
     const [moduleDescription, setModuleDescription] = useState('');
@@ -26,13 +21,13 @@ const AddModuleForm = ({ show, handleClose, moduleTutorId }) => {
             });
 
             if (response.status === 201) {
-                alert('Module added successfully');
+                showToast('Module added successfully', 'success');
             } else {
                 throw new Error(`Failed to add module: ${response.statusText}`);
             }
         } catch (error) {
             console.error('Error adding module:', error);
-            alert(`Failed to add module: ${error.message}`);
+            showToast(`Failed to add module`, 'danger');
         }
     };
 
@@ -51,10 +46,9 @@ const AddModuleForm = ({ show, handleClose, moduleTutorId }) => {
             handleClose();
         } catch (error) {
             console.error('Error adding module:', error);
-            alert(`Failed to add module: ${error.message}`);
+            showToast(`Failed to add module`, 'danger');
         }
     };
-
 
     return (
         <Modal isOpen={show} toggle={handleClose}>
@@ -85,7 +79,7 @@ const AddModuleForm = ({ show, handleClose, moduleTutorId }) => {
             </ModalBody>
             <ModalFooter>
                 <Button color="secondary" onClick={handleClose}>Close</Button>
-                <Button color="primary" onClick={ handleSaveChanges }>Save changes</Button>
+                <Button color="primary" onClick={handleSaveChanges}>Save changes</Button>
             </ModalFooter>
         </Modal>
     );
