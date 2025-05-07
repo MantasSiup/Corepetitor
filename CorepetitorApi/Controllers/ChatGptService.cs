@@ -35,7 +35,7 @@ namespace CorepetitorApi.Controllers
                 if (modules != null)
                 {
                     var descriptions = string.Join(";", modules.Select(m => m.Description));
-                    chat.AppendSystemMessage("A student will ask you for a suggestion what modules should he choose. you only have to answer what modules should the student choose and seperate them by \";\", it can be multiple. If the student writes something related to level (A) or (B) you need to take that into consideration also. Here is the list of modules you will need to select out of:");
+                    chat.AppendSystemMessage("A student will ask you for a suggestion what modules should he choose. you only have to answer what modules should the student choose and seperate them by \";\", it can be multiple. If the student writes something related to level (A) or (B) you need to take that into consideration also. Remember that if a student is training for an exam you should suggest the advanced module, and do not give not related modules. Here is the list of modules you will need to select out of:");
                     //chat.AppendSystemMessage("Math module (School level A), Lithuanian module (School level B), Math module (School level A), History module (University level), Program Systems module (University level), Networking module (Univesrity level), Programming module (School level A), Web-Design (School level B)");
                     //chat.AppendSystemMessage("Math module, Lithuanian module A, Lithuanian module B, Science module A, Science module B, History module A, History module B, Program Systems module, Networking module, Programming module, Web-Design");
                     chat.AppendSystemMessage(descriptions);

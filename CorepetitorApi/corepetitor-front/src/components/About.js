@@ -56,8 +56,7 @@ export const About = () => {
                         <Card.Body>
                             <Card.Title>⚡ Smart Search</Card.Title>
                             <Card.Text>
-                                Instantly search and filter tutors by city, subjects,
-                                ratings, and more.
+                                Instantly search and filter modules by requested themes and more.
                             </Card.Text>
                         </Card.Body>
                     </Card>
