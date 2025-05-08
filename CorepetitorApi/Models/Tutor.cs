@@ -19,5 +19,7 @@
         //public List<Student>? Students { get; set; }
         public List<Module>? Modules { get; set; }
 
+        public decimal? AverageRating { get; set; }
+
     }
 }

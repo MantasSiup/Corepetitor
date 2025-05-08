@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
-const ModuleModal = ({ tutorId, module, students, show, handleClose, showToast }) => {
+const ModuleModal = ({ tutorId, module, students, show, handleClose, showToast, onStartChat}) => {
     const [showDetails, setShowDetails] = useState({});
     const [editable, setEditable] = useState(false); // State to track edit mode
     const [editedModule, setEditedModule] = useState({}); // State to track edited module data
@@ -206,6 +206,14 @@ const ModuleModal = ({ tutorId, module, students, show, handleClose, showToast }
                                         Delete
                                         </Button>
                                     )}
+                                    <Button
+                                        variant="info"
+                                        style={{ marginLeft: '20px' }}
+                                        onClick={() => onStartChat && onStartChat(student, module)}
+                                    >
+                                        Chat
+                                    </Button>
+
                                     {showDetails[student.id] && (
                                         <>
                                             <p><strong>Email:</strong> {student.email}</p>
@@ -213,6 +221,7 @@ const ModuleModal = ({ tutorId, module, students, show, handleClose, showToast }
                                             <p><strong>Address:</strong> {student.address}</p>
                                         </>
                                     )}
+
                                     </p>
                             </div>
                         </li>

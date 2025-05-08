@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Button, Form, FormGroup, Input, Label, Table, Card, CardBody, CardTitle, Container, Row, Col, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -11,6 +11,7 @@ export class Home extends Component {
             tutor: {},
             tutorId: 0,
             newTutorData: {
+                id: 0,
                 name: '',
                 email: '',
                 password: '',
@@ -18,59 +19,38 @@ export class Home extends Component {
                 address: '',
                 city: '',
             },
+            toast: { show: false, message: '', variant: 'success' },
+            confirmDeleteId: null,
+            showAddConfirm: false
         };
     }
+
+    componentDidMount() {
+        this.fetchAllTutors();
+    }
+
+    showToast = (message, variant = 'success') => {
+        this.setState({ toast: { show: true, message, variant } });
+        setTimeout(() => {
+            this.setState({ toast: { ...this.state.toast, show: false } });
+        }, 3000);
+    };
 
     fetchAllTutors = async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await fetch('https://localhost:7014/api/Tutors', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-
             if (response.ok) {
                 const tutors = await response.json();
                 this.setState({ tutors });
             } else {
-                alert('Failed to fetch tutors: ' + response.status);
+                this.showToast('Failed to fetch tutors', 'danger');
             }
         } catch (error) {
-            alert('Error fetching tutors: ' + error);
+            this.showToast('Error fetching tutors', 'danger');
         }
-    };
-
-    fetchTutorById = async () => {
-        try {
-            const { tutorId } = this.state;
-
-            if (tutorId < 0) {
-                alert('Tutor ID cannot be negative.');
-                return;
-            }
-
-            const token = localStorage.getItem('token');
-            const response = await fetch(`https://localhost:7014/api/Tutors/${tutorId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (response.ok) {
-                const tutor = await response.json();
-                this.setState({ tutor });
-            } else {
-                alert(`Failed to fetch tutor with ID ${tutorId}: ` + response.status);
-            }
-        } catch (error) {
-            alert(`Error fetching tutor by ID`, error);
-        }
-    };
-
-    handleTutorIdChange = (event) => {
-        const tutorId = parseInt(event.target.value, 10);
-        this.setState({ tutorId });
     };
 
     handleInputChange = (field, value) => {
@@ -82,290 +62,187 @@ export class Home extends Component {
         }));
     };
 
-    addTutor = async () => {
+    addOrUpdateTutor = async () => {
+        this.setState({ showAddConfirm: false });
+
+        const { newTutorData } = this.state;
+        const method = newTutorData.id ? 'PUT' : 'POST';
+        const url = newTutorData.id
+            ? `https://localhost:7014/api/Tutors/${newTutorData.id}`
+            : 'https://localhost:7014/api/Tutors';
+
+        const payload = { ...newTutorData };
+
         try {
-            const response = await fetch('https://localhost:7014/api/Tutors', {
-                method: 'POST',
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify(this.state.newTutorData),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
                 this.fetchAllTutors();
-                console.log('Tutor added successfully');
+                this.showToast(`Tutor ${newTutorData.id ? 'updated' : 'added'} successfully!`);
+                this.setState({ newTutorData: { id: 0, name: '', email: '', password: '', phoneNumber: '', address: '', city: '' } });
             } else {
-                throw new Error(response.status);
+                this.showToast(`Failed to ${newTutorData.id ? 'update' : 'add'} tutor`, 'danger');
             }
         } catch (error) {
-            console.error('Error adding tutor:', error);
-            alert(`Failed to add tutor: ${error.message}`);
+            this.showToast('Server error during tutor save', 'danger');
         }
     };
 
-    updateTutor = async (id) => {
-        try {
-            const response = await fetch(`https://localhost:7014/api/Tutors/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: JSON.stringify(this.state.newTutorData),
-            });
-
-            if (response.ok) {
-                this.fetchAllTutors();
-                console.log(`Tutor with ID ${id} updated successfully`);
-            } else {
-                throw new Error(response.status);
-            }
-        } catch (error) {
-            console.error('Error updating tutor:', error);
-            alert(`Failed to update tutor: ${error.message}`);
-        }
+    confirmDelete = (id) => {
+        this.setState({ confirmDeleteId: id });
     };
 
-    deleteTutor = async (id) => {
+    deleteTutor = async () => {
+        const { confirmDeleteId } = this.state;
         try {
-            const response = await fetch(`https://localhost:7014/api/Tutors/${id}`, {
+            const response = await fetch(`https://localhost:7014/api/Tutors/${confirmDeleteId}`, {
                 method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-
             if (response.ok) {
                 this.fetchAllTutors();
-                console.log(`Tutor with ID ${id} deleted successfully`);
+                this.showToast('Tutor deleted successfully');
             } else {
-                throw new Error(response.status);
+                this.showToast('Failed to delete tutor', 'danger');
             }
         } catch (error) {
-            console.error('Error deleting tutor:', error);
-            alert(`Failed to delete tutor: ${error.message}`);
+            this.showToast('Error deleting tutor', 'danger');
+        } finally {
+            this.setState({ confirmDeleteId: null });
         }
     };
 
     render() {
-        const { tutors, tutor, tutorId } = this.state;
+        const { tutors, newTutorData, toast, confirmDeleteId, showAddConfirm } = this.state;
 
         return (
-            <div>
-                <div className="mb-4">
-                    <h2>Choose Action</h2>
-                    <Button color="primary" className="mr-2" onClick={this.fetchAllTutors}>
-                        Fetch All Tutors
-                    </Button>
-                </div>
-              
-                <div style={{ maxHeight: '200px', overflow: 'auto' }}>
-                    <h2>All Tutors</h2>
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone Number</th>
-                                    <th>Address</th>
-                                    <th>City</th>
-                                    {/* Add other properties as needed */}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {tutors.map((tutor) => (
-                                    <tr key={tutor.id}>
-                                        <td>{tutor.id}</td>
-                                        <td>{tutor.name}</td>
-                                        <td>{tutor.email}</td>
-                                        <td>{tutor.phoneNumber}</td>
-                                        <td>{tutor.address}</td>
-                                        <td>{tutor.city}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                </div>
-
-                <Form inline>
-                    <FormGroup className="mr-2">
-                        <Label for="tutorIdInput" className="mr-2">
-                            Tutor ID:
-                        </Label>
-                        <Input
-                            type="number"
-                            id="tutorIdInput"
-                            value={tutorId}
-                            onChange={this.handleTutorIdChange}
-                            style={{ width: '80px' }}
-                        />
-                    </FormGroup>
-                    <Button color="primary" onClick={this.fetchTutorById}>
-                        Fetch Tutor by ID
-                    </Button>
-                </Form>
-
-                <div>
-                    <h2>Specific Tutor</h2>
-                    {Object.keys(tutor).length !== 0 ? (
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone Number</th>
-                                    <th>Address</th>
-                                    <th>City</th>
-                                    {/* Add other properties as needed */}
-                                </tr>
-                            </thead>
-                            <tbody>  
-                                    <tr key={tutor.id}>
-                                        <td>{tutor.id}</td>
-                                        <td>{tutor.name}</td>
-                                        <td>{tutor.email}</td>
-                                        <td>{tutor.phoneNumber}</td>
-                                        <td>{tutor.address}</td>
-                                        <td>{tutor.city}</td>
-                                    </tr>
-                            </tbody>
-                        </table>
-                    ) : (
-                        <p>No specific tutor found.</p>
-                    )}
-                </div>
-
-                <div>
-                    <h2>Add Tutor</h2>
-                    <form>
-                        {/* Input fields for adding a new tutor */}
-                        <div>
-                            <label>Name:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.name}
-                                onChange={(e) => this.handleInputChange('name', e.target.value)}
-                            />
-                            <label>Email:</label>
-                            <Input
-                                type="email"
-                                value={this.state.newTutorData.email}
-                                onChange={(e) => this.handleInputChange('email', e.target.value)}
-                            />
-                            <label>Password:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.password}
-                                onChange={(e) => this.handleInputChange('password', e.target.value)}
-                            />
-                            <label>Phone number:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.phoneNumber}
-                                onChange={(e) => this.handleInputChange('phoneNumber', e.target.value)}
-                            />
-                            <label>Address:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.address}
-                                onChange={(e) => this.handleInputChange('address', e.target.value)}
-                            />
-                            <label>City:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.city}
-                                onChange={(e) => this.handleInputChange('city', e.target.value)}
-                            />
+            <Container className="py-4">
+                {toast.show && (
+                    <div className="toast-container position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
+                        <div className={`toast show text-white bg-${toast.variant} border-0`}>
+                            <div className="d-flex">
+                                <div className="toast-body">{toast.message}</div>
+                            </div>
                         </div>
-                        {/* Add other input fields for properties like email, password, etc. */}
-                        <Button color="primary" type="button" onClick={this.addTutor}>
-                            Add Tutor
-                        </Button>
-                    </form>
-                </div>
+                    </div>
+                )}
 
-                <div>
-                    <h2>Update Tutor</h2>
-                    <form>
-                        {/* Input fields for updating an existing tutor */}
-                        <div>
-                            <Label for="tutorIdInput" className="mr-2">
-                                Tutor ID:
-                            </Label>
-                            <Input
-                                type="number"
-                                value={this.state.newTutorData.id}
-                                onChange={(e) => this.handleInputChange('id', e.target.value)}
-                            />
-                            <label>Name:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.name}
-                                onChange={(e) => this.handleInputChange('name', e.target.value)}
-                            />
-                            <label>Email:</label>
-                            <Input
-                                type="email"
-                                value={this.state.newTutorData.email}
-                                onChange={(e) => this.handleInputChange('email', e.target.value)}
-                            />
-                            <label>Password:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.password}
-                                onChange={(e) => this.handleInputChange('password', e.target.value)}
-                            />
-                            <label>Phone number:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.phoneNumber}
-                                onChange={(e) => this.handleInputChange('phoneNumber', e.target.value)}
-                            />
-                            <label>Address:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.address}
-                                onChange={(e) => this.handleInputChange('address', e.target.value)}
-                            />
-                            <label>City:</label>
-                            <Input
-                                type="text"
-                                value={this.state.newTutorData.city}
-                                onChange={(e) => this.handleInputChange('city', e.target.value)}
-                            />
-                        </div>
-                        {/* Add other input fields for properties like email, password, etc. */}
-                        <Button color="primary" type="button" onClick={() => this.updateTutor(this.state.newTutorData.id)}>
-                            Update Tutor
-                        </Button>
-                    </form>
-                </div>
-                <div>
-                    <h2>Delete Tutor</h2>
-                    <Form inline>
-                        <FormGroup className="mr-2">
-                            <Label for="deleteTutorIdInput" className="mr-2">
-                                Tutor ID:
-                            </Label>
-                            <Input
-                                type="number"
-                                id="deleteTutorIdInput"
-                                value={tutorId}
-                                onChange={this.handleTutorIdChange}
-                                style={{ width: '80px' }}
-                            />
-                        </FormGroup>
-                        <Button color="danger" onClick={() => this.deleteTutor(tutorId)}>
-                            Delete Tutor
-                        </Button>
-                    </Form>
-                </div>
+                <h2 className="text-center mb-4">Admin Panel – Manage Tutors</h2>
 
-            </div>
+                <Card className="mb-4">
+                    <CardBody>
+                        <CardTitle tag="h5">Add / Update Tutor</CardTitle>
+                        <Row>
+                            <Col md={6}>
+                                <FormGroup>
+                                    <Label>Name</Label>
+                                    <Input value={newTutorData.name} onChange={(e) => this.handleInputChange('name', e.target.value)} />
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label>Email</Label>
+                                    <Input type="email" value={newTutorData.email} onChange={(e) => this.handleInputChange('email', e.target.value)} />
+                                </FormGroup>
+                                {!newTutorData.id && (
+                                    <FormGroup>
+                                        <Label>Password</Label>
+                                        <Input type="password" value={newTutorData.password} onChange={(e) => this.handleInputChange('password', e.target.value)} />
+                                    </FormGroup>
+                                )}
+                            </Col>
+                            <Col md={6}>
+                                <FormGroup>
+                                    <Label>Phone</Label>
+                                    <Input value={newTutorData.phoneNumber} onChange={(e) => this.handleInputChange('phoneNumber', e.target.value)} />
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label>Address</Label>
+                                    <Input value={newTutorData.address} onChange={(e) => this.handleInputChange('address', e.target.value)} />
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label>City</Label>
+                                    <Input value={newTutorData.city} onChange={(e) => this.handleInputChange('city', e.target.value)} />
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        <Button color="primary" onClick={() => this.setState({ showAddConfirm: true })}>
+                            {newTutorData.id ? 'Update' : 'Add'} Tutor
+                        </Button>
+                    </CardBody>
+                </Card>
+
+                <h4>All Tutors</h4>
+                <Table striped responsive>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>City</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tutors.map((t) => (
+                            <tr key={t.id}>
+                                <td>{t.id}</td>
+                                <td>{t.name}</td>
+                                <td>{t.email}</td>
+                                <td>{t.phoneNumber}</td>
+                                <td>{t.city}</td>
+                                <td>
+                                    <Button
+                                        size="sm"
+                                        color="info"
+                                        className="me-2"
+                                        onClick={() => this.setState({ newTutorData: { ...t, password: '' } })}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        color="danger"
+                                        onClick={() => this.confirmDelete(t.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+
+                {/* Confirm Delete Modal */}
+                <Modal isOpen={confirmDeleteId !== null} toggle={() => this.setState({ confirmDeleteId: null })}>
+                    <ModalHeader>Confirm Deletion</ModalHeader>
+                    <ModalBody>Are you sure you want to delete this tutor?</ModalBody>
+                    <ModalFooter>
+                        <Button color="danger" onClick={this.deleteTutor}>Yes, Delete</Button>{' '}
+                        <Button color="secondary" onClick={() => this.setState({ confirmDeleteId: null })}>Cancel</Button>
+                    </ModalFooter>
+                </Modal>
+
+                {/* Confirm Add/Update Modal */}
+                <Modal isOpen={showAddConfirm} toggle={() => this.setState({ showAddConfirm: false })}>
+                    <ModalHeader>Confirm {newTutorData.id ? 'Update' : 'Addition'}</ModalHeader>
+                    <ModalBody>
+                        Are you sure you want to {newTutorData.id ? 'update' : 'add'} this tutor?
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={this.addOrUpdateTutor}>Yes, {newTutorData.id ? 'Update' : 'Add'}</Button>{' '}
+                        <Button color="secondary" onClick={() => this.setState({ showAddConfirm: false })}>Cancel</Button>
+                    </ModalFooter>
+                </Modal>
+            </Container>
         );
     }
 }
+
+export default Home;

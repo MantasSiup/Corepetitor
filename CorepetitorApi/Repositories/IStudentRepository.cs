@@ -8,7 +8,7 @@ namespace CorepetitorApi.Repositories
         List<Student> GetAllStudents(int TutorId, int ModuleId);
         Student GetStudentById(int TutorId, int ModuleId, int id);
         Student GetStudentByEmail(string Email);
-        void AddStudent(int TutorId, int ModuleId, Student student);
+        bool AddStudent(int TutorId, int ModuleId, Student student);
         void AddStudent(Student student);
         void UpdateStudent(int TutorId, int ModuleId, Student student);
         void DeleteStudent(int TutorId, int ModuleId, int id);

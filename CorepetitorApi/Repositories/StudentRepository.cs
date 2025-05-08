@@ -1,6 +1,7 @@
 ﻿using CorepetitorApi.Models;
 using CorepetitorApi.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace CorepetitorApi.Repositories
 {
@@ -27,7 +28,7 @@ namespace CorepetitorApi.Repositories
             return students;
         }
 
-        public void AddStudent(int TutorId, int ModuleId, Student student)
+        public bool AddStudent(int TutorId, int ModuleId, Student student)
         {
             var isExisting = _context.Students.Any(sm => sm.Id == student.Id);
             if (!isExisting)
@@ -36,20 +37,37 @@ namespace CorepetitorApi.Repositories
                 _context.SaveChanges();
             }
 
-            var module = _context.Modules.FirstOrDefault(m => m.Id == ModuleId && m.TutorId == TutorId);
+            var module = _context.Modules.FirstOrDefault(m => m.Id == ModuleId);
             if (module == null)
             {
-                throw new Exception("Module not found or doesn't belong to the specified tutor.");
+                return false;
+            }
+            var tutorModules = _context.TutorModules.FirstOrDefault(m => m.TutorId == TutorId && m.ModuleId == ModuleId);
+            if (tutorModules == null)
+            {
+                return false;
+            }
+
+            var alreadyEnrolled = _context.StudentModules.Any(sm =>
+                sm.ModuleId == ModuleId &&
+                sm.TutorId == TutorId &&
+                sm.StudentId == student.Id);
+
+            if (alreadyEnrolled)
+            {
+                return false;
             }
 
             var studentModule = new StudentModule
             {
                 StudentId = student.Id,
-                ModuleId = ModuleId
+                ModuleId = ModuleId,
+                TutorId = TutorId
             };
 
             _context.StudentModules.Add(studentModule);
             _context.SaveChanges();
+            return true;
         }
 
         public void AddStudent(Student student)
@@ -82,7 +100,8 @@ namespace CorepetitorApi.Repositories
                 studentModule = new StudentModule
                 {
                     StudentId = student.Id,
-                    ModuleId = ModuleId
+                    ModuleId = ModuleId,
+                    TutorId = TutorId,
                 };
                 _context.StudentModules.Add(studentModule);
             }
@@ -117,6 +136,8 @@ namespace CorepetitorApi.Repositories
             if (studentModule == null)
             {
                 _context.Students.Remove(student);
+                var userRoles = _context.UserRoles.Where(ur => ur.Email == student.Email);
+                _context.UserRoles.RemoveRange(userRoles);
             }
 
             _context.SaveChanges();
@@ -132,7 +153,7 @@ namespace CorepetitorApi.Repositories
                 throw new Exception("Student not found.");
             }
 
-            var module = _context.Modules.FirstOrDefault(m => m.Id == ModuleId && m.TutorId == TutorId);
+            var module = _context.Modules.FirstOrDefault(m => m.Id == ModuleId);
             if (module == null)
             {
                 throw new Exception("Module not found or doesn't belong to the specified tutor.");

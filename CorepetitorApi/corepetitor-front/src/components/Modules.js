@@ -3,6 +3,8 @@ import { Button, Form, FormGroup, Input, Label, Modal } from 'reactstrap';
 import AddModuleForm from './AddModuleForm';
 import ModuleModal from './ModuleModal';
 import { Students } from './Students';
+import ModuleChat from './ModuleChat';
+
 
 export class Modules extends Component {
     static displayName = Modules.name;
@@ -36,6 +38,8 @@ export class Modules extends Component {
             toast: { show: false, message: '', variant: 'success' },
             searchQuery: '',
             editingModule: null,
+            showChat: false,
+            selectedStudent: null,
         };
     }
 
@@ -89,6 +93,8 @@ export class Modules extends Component {
                 console.log(tutor);
             } else {
                 alert(`Failed to fetch tutor by email ${email}: ` + response.status);
+                localStorage.clear();
+                window.location.href='/about';
             }
         } catch (error) {
             alert(`Error fetching tutor by email`, error);
@@ -300,6 +306,15 @@ export class Modules extends Component {
         this.setState({ searchQuery: e.target.value });
     };
 
+
+    handleOpenChat = (student, module) => {
+        this.setState({ selectedStudent: student, selectedModule: module, showChat: true });
+    };
+
+    handleCloseChat = () => {
+        this.setState({ showChat: false, selectedStudent: null });
+    };
+
     render() {
         const {
             tutor,
@@ -309,6 +324,8 @@ export class Modules extends Component {
             showModal,
             showForm,
             uniqueModules,
+            selectedStudent,
+            showChat
         } = this.state;
         const { show, message, variant } = this.state.toast;
         
@@ -411,7 +428,19 @@ export class Modules extends Component {
                     show={showModal}
                     handleClose={this.handleCloseModal}
                     showToast={this.showToast}
+                    onStartChat={this.handleOpenChat}
                 />
+                {showChat && (
+                        <ModuleChat
+                            moduleId={selectedModule.id}
+                            senderId={tutor.id}
+                            senderRole="tutor"
+                            studentId={selectedStudent.id}
+                            tutorId={tutor.id}
+                            show={showChat}
+                            onClose={this.handleCloseChat}
+                        />
+                )}
             </div>
             </>
         );

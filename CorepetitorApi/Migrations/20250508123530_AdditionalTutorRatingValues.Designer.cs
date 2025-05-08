@@ -3,6 +3,7 @@ using System;
 using CorepetitorApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CorepetitorApi.Migrations
 {
     [DbContext(typeof(CorepetitorDbContext))]
-    partial class CorepetitorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250508123530_AdditionalTutorRatingValues")]
+    partial class AdditionalTutorRatingValues
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,32 +202,6 @@ namespace CorepetitorApi.Migrations
                     b.HasKey("TutorId", "ModuleId");
 
                     b.ToTable("TutorModules");
-                });
-
-            modelBuilder.Entity("CorepetitorApi.Models.TutorModuleRating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("ModuleId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("TutorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TutorModuleRatings");
                 });
 
             modelBuilder.Entity("CorepetitorApi.Models.UserRole", b =>

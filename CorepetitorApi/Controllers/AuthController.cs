@@ -29,7 +29,6 @@ namespace CorepetitorApi.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterStudentDto registerDto)
         {
-            // Check if email already exists
             var existingStudent = _studentRepository.GetStudentByEmail(registerDto.Email);
             if (existingStudent != null)
             {
@@ -39,7 +38,6 @@ namespace CorepetitorApi.Controllers
             // Hash the password
             //var hashedPassword = authHelper.HashPassword(registerDto.Password);
 
-            // Create Student object
             var newStudent = new Student
             {
                 Name = registerDto.Name,
@@ -50,7 +48,6 @@ namespace CorepetitorApi.Controllers
                 City = registerDto.City
             };
 
-            // Save student
             _studentRepository.AddStudent(newStudent);
 
 

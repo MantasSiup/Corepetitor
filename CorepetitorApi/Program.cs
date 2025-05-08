@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using CorepetitorApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,11 +15,13 @@ var config = builder.Configuration;
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        builder => builder
-            .AllowAnyOrigin()
+    options.AddPolicy("AllowReactApp", builder =>
+        builder
+            .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowAnyHeader());
+            .SetIsOriginAllowed(_ => true)
+            .AllowCredentials()
+    );
 });
 
 // Add services to the container.
@@ -79,8 +82,12 @@ builder.Services.AddDbContext<CorepetitorDbContext>(options =>
 builder.Services.AddScoped<ITutorRepository, TutorRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddTransient<AuthRepository>();
 builder.Services.AddScoped<ChatGptService>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<RatingService>();
+
 
 var app = builder.Build();
 
@@ -99,5 +106,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

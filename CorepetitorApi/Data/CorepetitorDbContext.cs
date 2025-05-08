@@ -15,6 +15,10 @@ namespace CorepetitorApi.Data
         public DbSet<StudentModule> StudentModules { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<TutorModule> TutorModules { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<TutorModuleRating> TutorModuleRatings { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

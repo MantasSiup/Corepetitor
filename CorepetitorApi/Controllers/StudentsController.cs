@@ -46,10 +46,16 @@ public class StudentsController : ControllerBase
     [HttpPost]
     //[Authorize (Roles = "admin, tutor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<Student> Add(int tutorId, int moduleId, Student student)
     {
-        _repository.AddStudent(tutorId, moduleId, student);
+        var success = _repository.AddStudent(tutorId, moduleId, student);
+
+        if (!success)
+        {
+            return BadRequest("Enrollment failed. Student may already be enrolled in the module.");
+        }
         return CreatedAtAction(nameof(Get), new { tutorId, moduleId, id = student.Id }, student);
     }
 

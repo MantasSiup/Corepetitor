@@ -1,5 +1,6 @@
 ﻿using CorepetitorApi.Models;
 using CorepetitorApi.Data;
+using CorepetitorApi.Dtos;
 
 namespace CorepetitorApi.Repositories
 {
@@ -142,6 +143,78 @@ namespace CorepetitorApi.Repositories
         public bool ModuleExists(int id, int tutorId)
         {
             return _context.TutorModules.Any(tm => tm.ModuleId == id && tm.TutorId == tutorId);
+        }
+
+        public IEnumerable<TutorPublicDto> GetTutorsByModule(int moduleId)
+        {
+            return _context.TutorModules
+                .Where(tm => tm.ModuleId == moduleId)
+                .Join(
+                    _context.Tutors,
+                    tm => tm.TutorId,
+                    t => t.Id,
+                    (tm, t) => new TutorPublicDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Email = t.Email,
+                        PhoneNumber = t.PhoneNumber,
+                        Address = t.Address,
+                        City = t.City,
+                        AverageRating = t.AverageRating
+                    }
+                )
+                .ToList();
+        }
+
+        public IEnumerable<(Module, Tutor)> GetStudentModulesWithTutors(int studentId)
+        {
+            var studentModules = _context.StudentModules
+                .Where(sm => sm.StudentId == studentId)
+                .ToList();
+
+            var result = studentModules
+                .Select(sm =>
+                {
+                    var module = _context.Modules.FirstOrDefault(m => m.Id == sm.ModuleId);
+                    var tutorModule = _context.TutorModules.FirstOrDefault(tm => tm.ModuleId == sm.ModuleId && tm.TutorId == sm.TutorId);
+                    var tutor = tutorModule != null
+                        ? _context.Tutors.FirstOrDefault(t => t.Id == tutorModule.TutorId)
+                        : null;
+
+                    return (module, tutor);
+                });
+
+            return result!;
+        }
+
+        public bool UpdateTutorModuleRating(int tutorId, int moduleId, double rating)
+        {
+            if (rating < 1.0 || rating > 5.0)
+                throw new ArgumentOutOfRangeException(nameof(rating), "Rating must be between 1.0 and 5.0");
+
+            var record = _context.TutorModules.FirstOrDefault(tm => tm.TutorId == tutorId && tm.ModuleId == moduleId);
+            if (record == null) return false;
+
+            record.Rating = Convert.ToDecimal(rating);
+
+            var allRatings = _context.TutorModules
+                .Where(tm => tm.TutorId == tutorId && tm.Rating > 0)
+                .Select(tm => tm.Rating)
+                .ToList();
+
+            if (allRatings.Count > 0)
+            {
+                var average = allRatings.Average();
+                var tutor = _context.Tutors.FirstOrDefault(t => t.Id == tutorId);
+                if (tutor != null)
+                {
+                    tutor.AverageRating = average;
+                }
+            }
+
+            _context.SaveChanges();
+            return true;
         }
     }
 }

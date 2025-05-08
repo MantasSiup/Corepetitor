@@ -3,6 +3,7 @@ using System;
 using CorepetitorApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,49 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CorepetitorApi.Migrations
 {
     [DbContext(typeof(CorepetitorDbContext))]
-    partial class CorepetitorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507221042_AddTutorIdToStudentModules2")]
+    partial class AddTutorIdToStudentModules2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
-
-            modelBuilder.Entity("CorepetitorApi.Models.ChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ModuleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RecipientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RecipientRole")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderRole")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatMessages");
-                });
 
             modelBuilder.Entity("CorepetitorApi.Models.Module", b =>
                 {
@@ -157,9 +125,6 @@ namespace CorepetitorApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<decimal?>("AverageRating")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -193,38 +158,9 @@ namespace CorepetitorApi.Migrations
                     b.Property<int>("ModuleId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Rating")
-                        .HasColumnType("decimal(65,30)");
-
                     b.HasKey("TutorId", "ModuleId");
 
                     b.ToTable("TutorModules");
-                });
-
-            modelBuilder.Entity("CorepetitorApi.Models.TutorModuleRating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("ModuleId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("TutorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TutorModuleRatings");
                 });
 
             modelBuilder.Entity("CorepetitorApi.Models.UserRole", b =>

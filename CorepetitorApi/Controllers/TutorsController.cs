@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using CorepetitorApi.Repositories;
 using CorepetitorApi.Models;
 using System.Collections.Generic;
+using CorepetitorApi.Dtos;
 
 //[Authorize (Roles = "admin")]
 [Route("api/[controller]")]
@@ -71,7 +72,8 @@ public class TutorsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public ActionResult<Tutor> Add(Tutor tutor)
     {
-        // You might want to check if the tutor already exists to prevent duplicates.
+        if (string.IsNullOrWhiteSpace(tutor.Email) || string.IsNullOrWhiteSpace(tutor.Password))
+            return BadRequest("Email and password are required.");
         _repository.AddTutor(tutor);
         return CreatedAtAction(nameof(Get), new { id = tutor.Id }, tutor);
     }
@@ -82,13 +84,26 @@ public class TutorsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public ActionResult Update(int id, Tutor tutor)
+    public ActionResult Update(int id, TutorDto dto)
     {
-        if (id != tutor.Id)
+        if (id != dto.Id)
             return BadRequest("Tutor ID mismatch.");
 
-        // You can check if the update was successful, similar to the ModulesController.
-        _repository.UpdateTutor(tutor);
+        var existingTutor = _repository.GetTutorById(id);
+        if (existingTutor == null)
+            return NotFound($"Tutor with ID {id} not found.");
+        var updatedTutor = new Tutor
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber,
+            Address = dto.Address,
+            City = dto.City,
+            Password = existingTutor.Password // preserve original password
+        };
+
+        _repository.UpdateTutor(updatedTutor);
         return NoContent();
     }
 
