@@ -68,8 +68,8 @@ class StudentViewPage extends Component {
         }
     };
 
-    handleShowModal = (module) => {
-        this.setState({ showModal: true, selectedModule: module });
+    handleShowModal = (module, tutor) => {
+        this.setState({ showModal: true, selectedModule: { ...module, tutor } });
     };
 
     handleCloseModal = () => {
@@ -218,8 +218,8 @@ class StudentViewPage extends Component {
                         {modules.map(({ module, tutor }) => (
                             module && (
                                 <div className="col-md-6 col-lg-4 mb-4" key={module.id}>
-                                    <div className="card h-100 shadow-sm">
-                                        <div className="card-body d-flex flex-column">
+                                    <div className="card h-100 d-flex flex-column shadow-sm">
+                                        <div className="card-body d-flex flex-column flex-grow-1">
                                             <h5 className="card-title">{module.name}</h5>
                                             <p className="card-text text-muted">{module.description}</p>
                                             <p className="mb-1"><strong>Price/hour:</strong> €{module.pricePerHour}</p>
@@ -270,27 +270,30 @@ class StudentViewPage extends Component {
 
 
 
-                                            <div className="mt-4 d-flex justify-content-between">
+                                            <div className="mt-4 d-flex justify-content-between align-items-center gap-2 flex-wrap">
                                                 <Button
                                                     variant="primary"
-                                                    onClick={() => this.handleShowModal(module)}
+                                                    className="flex-fill"
+                                                    onClick={() => this.handleShowModal(module, tutor)}
                                                 >
                                                     View
                                                 </Button>
                                                 <Button
                                                     variant="outline-primary"
+                                                    className="flex-fill"
                                                     onClick={() => this.handleOpenChat(module.id, tutor.id)}
                                                 >
                                                     Chat
                                                 </Button>
                                                 <Button
                                                     variant="outline-danger"
+                                                    className="flex-fill"
                                                     onClick={() => this.setState({ showConfirmModal: true, pendingRemoval: { module, tutor } })}
                                                 >
                                                     Remove
                                                 </Button>
-                                                
                                             </div>
+
                                         </div>
                                     </div>
                                     

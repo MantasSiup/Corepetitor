@@ -18,6 +18,7 @@ export class TutorSearch extends Component {
             loadingTutors: false,
             alert: { show: false, message: '', variant: 'success' },
             studentEnrollments: [],
+            moduleRatings: {},
         };
     }
 
@@ -119,22 +120,42 @@ export class TutorSearch extends Component {
             .catch(error => this.showAlert('Error using AI suggestion.', 'danger'));
     };
 
-    handleOpenTutorModal = async (module) => {
-        this.setState({ selectedModule: module, showTutorModal: true, loadingTutors: true });
-        try {
-            const res = await fetch(`https://localhost:7014/api/TutorModules/module/${module.id}/tutors`);
-            if (res.ok) {
-                const tutors = await res.json();
-                this.setState({ availableTutors: tutors, loadingTutors: false });
-            } else {
-                this.setState({ availableTutors: [], loadingTutors: false });
-                this.showAlert('No tutors found for this module.', 'warning');
-            }
-        } catch (err) {
-            this.setState({ loadingTutors: false });
-            this.showAlert('Error fetching tutors.', 'danger');
+   handleOpenTutorModal = async (module) => {
+    this.setState({ selectedModule: module, showTutorModal: true, loadingTutors: true });
+
+    try {
+        const res = await fetch(`https://localhost:7014/api/TutorModules/module/${module.id}/tutors`);
+        if (res.ok) {
+            const tutors = await res.json();
+
+            const tutorsWithRatings = await Promise.all(
+                tutors.map(async tutor => {
+                    try {
+                        const ratingRes = await fetch(`https://localhost:7014/api/TutorModules/${module.id}/rating?tutorId=${tutor.id}`);
+                        const moduleRating = ratingRes.ok ? await ratingRes.json() : null;
+                        return { ...tutor, moduleRating };
+                    } catch {
+                        return { ...tutor, moduleRating: null };
+                    }
+                })
+            );
+
+            tutorsWithRatings.sort((a, b) => {
+                const r1 = a.moduleRating ?? -1;
+                const r2 = b.moduleRating ?? -1;
+                return r2 - r1;
+            });
+
+            this.setState({ availableTutors: tutorsWithRatings, loadingTutors: false });
+        } else {
+            this.setState({ availableTutors: [], loadingTutors: false });
+            this.showAlert('No tutors found for this module.', 'warning');
         }
-    };
+    } catch (err) {
+        this.setState({ loadingTutors: false });
+        this.showAlert('Error fetching tutors.', 'danger');
+    }
+};
 
     handleSelectTutor = (tutorId) => {
         this.setState({ selectedTutorId: tutorId });
@@ -287,21 +308,36 @@ export class TutorSearch extends Component {
                                                         <p className="mb-1 small">Email: {tutor.email}</p>
                                                     </div>
                                                     <div className="text-end">
-                                                        {tutor.averageRating != null ? (
-                                                            <>
-                                                                <span className="text-warning" style={{ fontSize: '1.2rem' }}>⭐</span>
-                                                                <strong>{tutor.averageRating.toFixed(1)}</strong> / 5
-                                                            </>
-                                                        ) : (
-                                                            <span className="text-muted small">Not yet rated</span>
-                                                        )}
-                                                        {isEnrolled && (
-                                                            <div className="text-danger small mt-1">Already Enrolled</div>
-                                                        )}
+                                                        <div>
+                                                            <small className="text-muted">Module Rating:</small><br />
+                                                            {tutor.moduleRating != null && tutor.moduleRating > 0 ? (
+                                                                <>
+                                                                    <span className="text-warning" style={{ fontSize: '1.2rem' }}>⭐</span>
+                                                                    <strong>{tutor.moduleRating.toFixed(2)}</strong> / 5
+                                                                </>
+                                                            ) : (
+                                                                <span className="badge bg-secondary">Unrated</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="mt-1">
+                                                            <small className="text-muted">Overall Rating:</small><br />
+                                                            {tutor.averageRating != null && tutor.averageRating > 0 ? (
+                                                                <>
+                                                                    <span className="text-warning" style={{ fontSize: '1.2rem' }}>⭐</span>
+                                                                    <strong>{tutor.averageRating.toFixed(2)}</strong> / 5
+                                                                </>
+                                                            ) : (
+                                                                <span className="badge bg-secondary">Unrated</span>
+                                                            )}
+
+                                                        </div>
                                                     </div>
+
+
                                                 </div>
                                             </div>
                                         );
+
                                     })}
                                 </div>
                             </Form.Group>

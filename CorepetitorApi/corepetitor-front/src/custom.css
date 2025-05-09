@@ -31,6 +31,8 @@ code {
 }
 .tutor-card:hover {
   background-color: #f8f9fa;
+  transform: scale(1.01);
+  transition: all 0.2s ease-in-out;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 .tutor-card.selected {

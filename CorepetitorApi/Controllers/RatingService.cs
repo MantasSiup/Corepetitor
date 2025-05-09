@@ -21,6 +21,13 @@
             return tutorModule?.Rating;
         }
 
+        public decimal? GetTutorRating(int tutorId)
+        {
+            var tutorRating = _context.Tutors
+                .FirstOrDefault(t => t.Id == tutorId).AverageRating;
+            return tutorRating;
+        }
+
         public decimal? GetStudentModuleRatings(int moduleId, int tutorId, int studentId)
         {
             var tutorModuleRatings = _context.TutorModuleRatings

@@ -1,10 +1,27 @@
 ﻿import React, { Component } from 'react';
-import { Modal, Button, Form, Spinner, Toast, ToastContainer } from 'react-bootstrap';
-import { withRouter } from 'react-router-dom';
+import { Modal, Button, Row, Col, Badge } from 'react-bootstrap';
 
 class ModuleModalStudent extends Component {
+
     render() {
         const { module, show, handleClose } = this.props;
+
+        if (!module) {
+            return (
+                <Modal show={show} onHide={handleClose} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Module Details</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p className="text-muted">No module selected.</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>Close</Button>
+                    </Modal.Footer>
+                </Modal>
+            );
+        }
+
 
         return (
             <Modal show={show} onHide={handleClose} centered size="lg">
@@ -12,22 +29,26 @@ class ModuleModalStudent extends Component {
                     <Modal.Title>Module Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {module ? (
-                        <div className="px-2">
-                            <h5 className="mb-3">{module.name}</h5>
-                            <p><strong>Description:</strong> {module.description}</p>
-                            <p><strong>Price per hour:</strong> €{module.pricePerHour}</p>
-                            <p><strong>Start date:</strong> {new Date(module.startDate).toLocaleDateString()}</p>
-                            <p><strong>End date:</strong> {new Date(module.endDate).toLocaleDateString()}</p>
-                            <hr />
-                            <p><strong>Tutor ID:</strong> {module.tutorId ?? 'Unknown'}</p>
-                        </div>
-                    ) : (
-                        <p className="text-muted">No module selected.</p>
-                    )}
+                    <Row className="mb-4">
+                        <Col md={6}>
+                            <h5 className="text-dark mb-3">📘 {module.name}</h5>
+                            <p className="mb-2"><strong>Description:</strong><br /> {module.description}</p>
+                            <p className="mb-2"><strong>Price per hour:</strong> <Badge bg="success">€{module.pricePerHour}</Badge></p>
+                            <p className="mb-2"><strong>Start Date:</strong> {new Date(module.startDate).toLocaleDateString()}</p>
+                            <p className="mb-2"><strong>End Date:</strong> {new Date(module.endDate).toLocaleDateString()}</p>                        </Col>
+                        <Col md={6}>
+                            <h6 className="text-primary mb-3">👤 Tutor Information</h6>
+                            <p className="mb-2"><strong>Name:</strong> {module.tutor?.name ?? 'Unknown'}</p>
+                            <p className="mb-2"><strong>Email:</strong> <a href={`mailto:${module.tutor?.email}`}>{module.tutor?.email}</a></p>
+                            <p className="mb-2"><strong>Phone:</strong> {module.tutor?.phoneNumber}</p>
+                            <p className="mb-2"><strong>City:</strong> {module.tutor?.city}</p>
+                        </Col>
+                    </Row>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>Close</Button>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                    </Button>
                 </Modal.Footer>
             </Modal>
         );

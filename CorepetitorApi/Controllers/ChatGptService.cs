@@ -1,4 +1,5 @@
-﻿using CorepetitorApi.Models;
+﻿using System;
+using CorepetitorApi.Models;
 using CorepetitorApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +26,7 @@ namespace CorepetitorApi.Controllers
         public async Task<string> SendMessage(string userInput)
         {
             var chat = _openAiClient.Chat.CreateConversation();
-            chat.Model = Model.DefaultChatModel;
+            chat.Model = Model.GPT4_Turbo;
 
             var result = _uniqueModulesController.GetAllUniqueModules();
 
@@ -35,12 +36,25 @@ namespace CorepetitorApi.Controllers
                 if (modules != null)
                 {
                     var descriptions = string.Join(";", modules.Select(m => m.Description));
-                    chat.AppendSystemMessage("A student will ask you for a suggestion what modules should he choose. you only have to answer what modules should the student choose and seperate them by \";\", it can be multiple. If the student writes something related to level (A) or (B) you need to take that into consideration also. Remember that if a student is training for an exam you should suggest the advanced module, and do not give not related modules. Here is the list of modules you will need to select out of:");
-                    //chat.AppendSystemMessage("Math module (School level A), Lithuanian module (School level B), Math module (School level A), History module (University level), Program Systems module (University level), Networking module (Univesrity level), Programming module (School level A), Web-Design (School level B)");
-                    //chat.AppendSystemMessage("Math module, Lithuanian module A, Lithuanian module B, Science module A, Science module B, History module A, History module B, Program Systems module, Networking module, Programming module, Web-Design");
-                    chat.AppendSystemMessage(descriptions);
+                    chat.AppendSystemMessage($"""
+                    You are a helpful assistant that suggests suitable learning modules to students based on their goals, interests, or exam preparation. You must only respond with the names of relevant modules from the provided list — separated by semicolons (;).
+
+                    Guidelines:
+                    - ONLY suggest modules from the list below.
+                    - If the student mentions a level (e.g., A, B), prefer modules that match or are appropriate for that level.
+                    - If exam preparation is mentioned, prioritize ADVANCED modules.
+                    - If no relevant modules match, respond with an empty string.
+                    - DO NOT suggest unrelated or general modules.
+                    - NEVER explain or add extra text — just return the selected module names.
+
+                    Module list:
+                    {descriptions}
+
+                    """);
+
                     chat.AppendUserInput(userInput);
-                    chat.AppendSystemMessage("Only reply the module names divided by \";\"");
+                    chat.AppendSystemMessage("Respond ONLY with the selected module names, separated by semicolons (;), and nothing else.");
+
                     string response = await chat.GetResponseFromChatbotAsync();
 
                     //Console.WriteLine(response);

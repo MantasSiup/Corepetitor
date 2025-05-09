@@ -63,6 +63,19 @@ namespace CorepetitorApi.Controllers
             return Ok(rating);
         }
 
+        [HttpGet("{tutorId}/tutor-rating")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult GetTutorRating(int tutorId)
+        {
+            var rating = _ratingService.GetTutorRating(tutorId);
+
+            if (rating == null)
+                return NotFound("No rating found for this module and tutor.");
+
+            return Ok(rating);
+        }
+
         [HttpGet("{moduleId}/ratings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
