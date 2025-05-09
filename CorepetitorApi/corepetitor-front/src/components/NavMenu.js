@@ -73,7 +73,7 @@ export class NavMenu extends Component {
                                         <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
                                     </NavItem>
                                     <NavItem>
-                                        <NavLink tag={Link} className="text-dark" to="/modules">Modules</NavLink>
+                                        <NavLink tag={Link} className="text-dark" to="/modules">📘Modules</NavLink>
                                     </NavItem>
                                     <NavItem>
                                         <NavLink tag={Link} className="text-dark" to="/students">Students</NavLink>
@@ -82,17 +82,21 @@ export class NavMenu extends Component {
                             )}
                             {userRole === 'student' && (
                                 <>
-                                   
                                     <NavItem>
-                                        <NavLink tag={Link} className="text-dark" to="/studentView">StudentView</NavLink>
+                                        <NavLink tag={Link} className="text-dark" to="/studentView">📘Modules</NavLink>
                                     </NavItem>
+                                    <NavItem>
+                                        <NavLink tag={Link} className="text-dark" to="/calendar">📅 Calendar</NavLink>
+                                    </NavItem>  
                                 </>
                             )}
                             {userRole === 'tutor' && (
-                                <>
-                                   
+                                <>     
                                     <NavItem>
-                                        <NavLink tag={Link} className="text-dark" to="/modules">Modules</NavLink>
+                                        <NavLink tag={Link} className="text-dark" to="/modules">📘Modules</NavLink>
+                                    </NavItem>
+                                    <NavItem>
+                                        <NavLink tag={Link} className="text-dark" to="/calendar">📅 Calendar</NavLink>
                                     </NavItem>
                                 </>
                             )}

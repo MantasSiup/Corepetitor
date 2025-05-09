@@ -169,6 +169,53 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CorepetitorApi.Controllers.LessonScheduleController",
+    "Method": "AddLesson",
+    "RelativePath": "api/LessonSchedule",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "CorepetitorApi.Dtos.LessonScheduleDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CorepetitorApi.Controllers.LessonScheduleController",
+    "Method": "GetLessonsForUser",
+    "RelativePath": "api/LessonSchedule/user",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "role",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[CorepetitorApi.Dtos.LessonScheduleDto, CorepetitorApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "CorepetitorApi.Controllers.StudentInfoController",
     "Method": "GetPublicStudentByEmail",
     "RelativePath": "api/StudentInfo/by-email",

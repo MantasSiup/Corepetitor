@@ -32,8 +32,8 @@ namespace CorepetitorApi.Controllers
                 .Where(m =>
                     m.ModuleId == moduleId &&
                     (
-                        (m.SenderId == studentId && m.SenderRole == "student") ||
-                        (m.SenderId == tutorId && m.SenderRole == "tutor")
+                        (m.SenderId == studentId && m.SenderRole == "student" && m.RecipientId == tutorId && m.RecipientRole == "tutor") ||
+                        (m.SenderId == tutorId && m.SenderRole == "tutor" && m.RecipientId == studentId && m.RecipientRole == "student")
                     ))
                 .OrderBy(m => m.Timestamp)
                 .ToList();
@@ -48,7 +48,6 @@ namespace CorepetitorApi.Controllers
             message.Timestamp = DateTime.UtcNow;
             await _chatRepository.AddMessageAsync(message);
 
-            // Determine expected student/tutor based on sender/recipient roles
             var isFromStudent = message.SenderRole == "student";
 
             var studentId = isFromStudent ? message.SenderId : message.RecipientId;

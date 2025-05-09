@@ -230,7 +230,7 @@ class StudentViewPage extends Component {
 
                                             {this.state.ratings[module.id] !== undefined && (
                                                 <p className="mb-1 text-muted">
-                                                Your Current Rating: <strong>{this.state.ratings[module.id].toFixed(1)}</strong> / 5
+                                                Your Current Rating: <strong>{this.state.ratings[module.id].toFixed(2)}</strong> / 5
                                                 </p>
                                             )}
 
@@ -264,7 +264,11 @@ class StudentViewPage extends Component {
                                                 }
                                                 disabled={this.state.submittingRating}
                                             >
-                                                {this.state.submittingRating ? 'Submitting...' : 'Submit Rating'}
+                                                 {this.state.submittingRating
+                                                    ? 'Submitting...'
+                                                    : this.state.ratings[module.id] != null
+                                                    ? 'Change Rating'
+                                                    : 'Submit Rating'}
                                             </Button>
                                             </div>
 

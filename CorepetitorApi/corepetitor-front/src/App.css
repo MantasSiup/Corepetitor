@@ -37,7 +37,6 @@
   }
 }
 
-/* App.css or separate CSS file */
 .modal {
     display: none;
     position: fixed;
@@ -59,3 +58,4 @@
 .modal.open {
     display: flex;
 }
+

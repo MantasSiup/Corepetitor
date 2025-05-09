@@ -16,17 +16,26 @@ namespace CorepetitorApi.Repositories
 
         public List<Student> GetAllStudents(int TutorId, int ModuleId)
         {
-            var module = _context.Modules.FirstOrDefault(m => m.TutorId == TutorId && m.Id == ModuleId);
+            var module = _context.TutorModules.FirstOrDefault(m => m.TutorId == TutorId && m.ModuleId == ModuleId);
 
             if (module == null)
             {
                 return new List<Student>();
             }
 
-            var students = _context.Students.Where(st => st.StudentModules.Any(sm => sm.ModuleId == module.Id)).ToList();
+            var studentIds = _context.StudentModules
+                .Where(sm => sm.ModuleId == ModuleId && sm.TutorId == TutorId)
+                .Select(sm => sm.StudentId)
+                .Distinct()
+                .ToList();
+
+            var students = _context.Students
+                .Where(s => studentIds.Contains(s.Id))
+                .ToList();
 
             return students;
         }
+
 
         public bool AddStudent(int TutorId, int ModuleId, Student student)
         {

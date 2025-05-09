@@ -234,8 +234,8 @@ export class Modules extends Component {
         }
     };
 
-    handleShowModal = (module) => {
-        this.fetchAllStudents(module);
+    handleShowModal = (module, tutorId) => {
+        this.fetchAllStudents(module, tutorId);
     }
 
     handleCloseModal = () => {
@@ -243,10 +243,10 @@ export class Modules extends Component {
         this.fetchAllModules();
     }
 
-    fetchAllStudents = async (module) => {
+    fetchAllStudents = async (module, tutorId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`https://localhost:7014/api/Tutors/${module.tutorId}/Modules/${module.id}/Students`, {
+            const response = await fetch(`https://localhost:7014/api/Tutors/${tutorId}/Modules/${module.id}/Students`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -370,7 +370,7 @@ export class Modules extends Component {
                                             <div className="mt-auto">
                                                 <Button
                                                     variant="outline-primary"
-                                                    onClick={() => this.handleShowModal(module)}>
+                                                    onClick={() => this.handleShowModal(module, tutor.id)}>
                                                     View
                                                 </Button>
                                             </div>

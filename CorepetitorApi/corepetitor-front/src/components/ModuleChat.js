@@ -33,7 +33,6 @@ const ModuleChat = ({ moduleId, senderId, senderRole, show, onClose, studentId, 
                 });
             },0);
             
-                // Correctly check latest modal state
                 if (!showRef.current) setShowToast(true);
             });
             

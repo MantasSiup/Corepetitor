@@ -9,6 +9,7 @@ import Register from './components/Register';
 import Modules from './components/Modules';
 import StudentView from './components/StudentView';
 import TutorSearch from './components/TutorSearch';
+import CalendarPage from './components/CalendarPage';
 import './custom.css';
 import { getUserRoleFromToken } from './helpers/authHelper';
 
@@ -60,6 +61,7 @@ export default class App extends Component {
                     <Route path="/about" element={<About />} />
                     <Route path="/studentView" element={<StudentView />} />
                     <Route path="/tutor-search" element={<TutorSearch />} />
+                    <Route path="/calendar" element={<CalendarPage />} />
                 </Routes>
             </Layout>
         );

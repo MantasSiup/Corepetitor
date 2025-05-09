@@ -87,6 +87,7 @@ builder.Services.AddTransient<AuthRepository>();
 builder.Services.AddScoped<ChatGptService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<RatingService>();
+builder.Services.AddScoped<ILessonScheduleRepository, LessonScheduleRepository>();
 
 
 var app = builder.Build();

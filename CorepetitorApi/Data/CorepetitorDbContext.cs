@@ -17,6 +17,7 @@ namespace CorepetitorApi.Data
         public DbSet<TutorModule> TutorModules { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<TutorModuleRating> TutorModuleRatings { get; set; }
+        public DbSet<LessonSchedule> Lessons { get; set; }
 
 
 
